@@ -34,16 +34,22 @@ export default function WelcomeScreen() {
             <span className="lp-headline-accent">3Dで体感</span>してください
           </h1>
 
-          <p className="lp-body">
-            和建設のリアルオーダーメイドサービスで、<br/>
-            壁・床・照明・スタイルを部屋ごとに自由にカスタマイズ。<br/>
-            担当コーディネーターとの打合せをより深く、よりスムーズに。
+          <p className="lp-subhead">
+            鷹匠マンションの実際の間取りをもとに、壁・床・照明を自分好みに組み合わせて3Dで確認できます。
           </p>
 
-          <button className="lp-cta" onClick={startSimulation}>
-            シミュレーションを始める
-            <span className="lp-cta-arrow">→</span>
-          </button>
+          <p className="lp-body">
+            内装のイメージを固めてから打合せに進めるので、<br/>
+            担当コーディネーターとの相談もよりスムーズに。
+          </p>
+
+          <div className="lp-cta-group">
+            <button className="lp-cta" onClick={startSimulation}>
+              シミュレーションを始める
+              <span className="lp-cta-arrow">→</span>
+            </button>
+            <p className="lp-cta-hint">間取りを選ぶだけで、今すぐ体験できます</p>
+          </div>
 
           <div className="lp-features">
             <div className="lp-feature">
@@ -93,6 +99,10 @@ export default function WelcomeScreen() {
               ))}
             </div>
           </div>
+          <div className="lp-visual-link">
+            <span className="lp-visual-link-arrow">↓</span>
+            この空間を3Dで自分好みにカスタマイズ
+          </div>
         </div>
       </section>
 
@@ -108,13 +118,19 @@ export default function WelcomeScreen() {
           <div className="lp-step-arrow" aria-hidden="true">→</div>
           <div className="lp-step">
             <div className="lp-step-num">02</div>
-            <div className="lp-step-name">インテリアをカスタマイズ</div>
-            <div className="lp-step-desc">壁・床・照明・スタイルを<br/>部屋ごとに自由に選択できます</div>
+            <div className="lp-step-name">暮らし方を選ぶ</div>
+            <div className="lp-step-desc">プレミアム・ファミリーなど<br/>好みのインテリアの方向性を選択</div>
           </div>
           <div className="lp-step-arrow" aria-hidden="true">→</div>
           <div className="lp-step">
             <div className="lp-step-num">03</div>
-            <div className="lp-step-name">プランを確認・共有</div>
+            <div className="lp-step-name">3Dでカスタマイズ</div>
+            <div className="lp-step-desc">壁・床・照明・スタイルを<br/>部屋ごとに自由に調整できます</div>
+          </div>
+          <div className="lp-step-arrow" aria-hidden="true">→</div>
+          <div className="lp-step">
+            <div className="lp-step-num">04</div>
+            <div className="lp-step-name">完成したプランを確認</div>
             <div className="lp-step-desc">商談シートを作成して<br/>担当者との打合せにお役立てください</div>
           </div>
         </div>

@@ -671,11 +671,33 @@ button:active:not(:disabled) { transform: scale(0.97); }
   border-radius: 2px;
 }
 
+/* Subhead: 一文で「何ができるか」を伝える */
+.lp-subhead {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.7;
+  letter-spacing: 0.3px;
+}
+
 /* Body */
 .lp-body {
-  font-size: 14px;
+  font-size: 13px;
   color: var(--text-sec);
-  line-height: 2;
+  line-height: 1.9;
+  letter-spacing: 0.3px;
+}
+
+/* CTA group: ボタン + 心理的ハードルを下げる一言 */
+.lp-cta-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+.lp-cta-hint {
+  font-size: 12px;
+  color: var(--text-muted);
   letter-spacing: 0.3px;
 }
 
@@ -788,8 +810,8 @@ button:active:not(:disabled) { transform: scale(0.97); }
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 14px;
-  max-width: 820px;
+  gap: 12px;
+  max-width: 1040px;
   margin: 0 auto 36px;
   flex-wrap: wrap;
 }
@@ -798,8 +820,8 @@ button:active:not(:disabled) { transform: scale(0.97); }
   border: 1px solid var(--border);
   border-top: 3px solid var(--green);
   border-radius: 8px;
-  padding: 22px 26px;
-  min-width: 196px;
+  padding: 20px 22px;
+  min-width: 176px;
   text-align: center;
 }
 .lp-step-num {
@@ -1155,6 +1177,21 @@ button:active:not(:disabled) { transform: scale(0.97); }
   padding: 16px 10px 8px;
   background: linear-gradient(0deg, rgba(0,0,0,0.65) 0%, transparent 100%);
   color: #FFFFFF; font-size: 11px; font-weight: 700; letter-spacing: 2px;
+}
+
+/* 実物写真 → 3D体験 の関係を示す一言 */
+.lp-visual-link {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--green-dark);
+  letter-spacing: 0.3px;
+}
+.lp-visual-link-arrow {
+  color: var(--green);
+  font-size: 13px;
 }
 
 /* ── Simulation 実物設備写真ストリップ ──────────────────── */

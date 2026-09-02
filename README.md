@@ -73,3 +73,21 @@ docs/
 - [システムフロー設計書](docs/system-flow.md)
 - [ロール別指示書](docs/roles/)
 - [デザインガイド](docs/design-guide/room-design-rules.md)
+
+## 更新をGitHubに反映する（push）
+
+コードを修正したあと、その変更をGitHub上の保存場所に反映するには、以下の3つの操作をこの順番で行う。
+
+```bash
+git add -A
+git commit -m "変更内容の説明"
+git push
+```
+
+| コマンド | やっていること |
+| --- | --- |
+| `git add -A` | 変更したファイルを「アップロード対象」として選ぶ |
+| `git commit -m "..."` | 選んだ変更を「区切り（履歴の1つ）」として記録する |
+| `git push` | 記録した変更をGitHub上へアップロードする |
+
+このプロジェクトではClaude Codeがこの3操作をまとめて代行できる。変更後に「GitHubに反映して」と伝えれば実行される。

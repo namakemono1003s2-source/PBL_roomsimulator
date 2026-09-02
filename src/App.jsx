@@ -3,10 +3,11 @@ import { useStore } from './store/useStore'
 import WelcomeScreen from './components/WelcomeScreen'
 import PlanSelector from './components/PlanSelector'
 import FurnitureSelector from './components/FurnitureSelector'
-import FloorPlan from './components/FloorPlan'
 import CustomizationPanel from './components/CustomizationPanel'
-import SummaryModal from './components/SummaryModal'
-import { PLAN_ROOMS, PLAN_INFO, FURNITURE_TEMPLATES, ROOM_PHOTOS } from './data/roomData'
+import FlowCheck from './components/FlowCheck'
+import SummaryScreen from './components/SummaryScreen'
+import { PLAN_ROOMS, PLAN_INFO, FURNITURE_TEMPLATES } from './data/roomData'
+import interiorTheme from './assets/interior-theme.png'
 
 const ApartmentViewerLazy = lazy(() => import('./components/ApartmentViewer'))
 
@@ -40,10 +41,10 @@ function Simulation() {
   const planType          = useStore(s => s.planType)
   const furnitureTemplate = useStore(s => s.furnitureTemplate)
   const resetToStart      = useStore(s => s.resetToStart)
-  const goBack            = useStore(s => s.goBack)
+  const goBack             = useStore(s => s.goBack)
+  const openFlowCheck      = useStore(s => s.openFlowCheck)
+  const openSummary        = useStore(s => s.openSummary)
 
-  const [showSummary,     setShowSummary]     = useState(false)
-  const [showPlan,        setShowPlan]         = useState(true)
   // #6: 「最初から」確認ダイアログ
   const [showResetConfirm, setShowResetConfirm] = useState(false)
   // #5: 初回操作ガイド（localStorage で一度だけ表示）
@@ -60,121 +61,73 @@ function Simulation() {
   if (activeRoom !== selectedRoom) setSelectedRoom(activeRoom)
 
   return (
-    <div className="app">
-      {/* Header */}
-      <header className="app-header">
-        <div className="header-brand">
+    <div className="sim-stage">
+      {/* 背景（本番では Three.js キャンバスがここに入るため、画像は光の参考として敷く） */}
+      <div className="sim-stage-bg">
+        <img src={interiorTheme} alt="" />
+      </div>
+
+      <div className="sim-canvas-layer">
+        <ViewerBoundary>
+          <Suspense fallback={<LoadingRoom />}>
+            <ApartmentViewerLazy
+              planType={planType}
+              furnitureTemplate={furnitureTemplate}
+            />
+          </Suspense>
+        </ViewerBoundary>
+      </div>
+
+      {/* 上部フローティングバー */}
+      <div className="sim-topbar">
+        <div className="sim-panel sim-topbar-left">
           <div className="brand-logo"><span className="logo-kanji">和</span></div>
-          <div className="brand-text">
-            <div className="brand-name">和建設株式会社</div>
-            <div className="brand-tagline">鷹匠マンション　インテリアシミュレーター</div>
-          </div>
+          <span className="sim-topbar-chip">{planInfo?.name} {planInfo?.type}</span>
+          <span className="sim-topbar-vrule" />
+          <span className="sim-topbar-chip">{tmplLabel}</span>
         </div>
 
-        <div className="header-property">
-          <div className="prop-badge"><span className="prop-unit">{planInfo?.name}</span></div>
-          <div className="prop-info">
-            <span>{planInfo?.type}</span>
-            <span className="prop-sep">｜</span>
-            <span>{planInfo?.area}</span>
-            <span className="prop-sep">｜</span>
-            <span>{tmplLabel}</span>
-          </div>
-        </div>
+        <nav className="sim-panel sim-roomtabs">
+          {Object.entries(rooms).map(([id, room]) => (
+            <button
+              key={id}
+              className={`sim-roomtab ${activeRoom === id ? 'active' : ''}`}
+              onClick={() => setSelectedRoom(id)}
+            >
+              <span className="tab-label">{room.label}</span>
+            </button>
+          ))}
+        </nav>
 
-        <div className="header-actions">
-          {/* #7: 1ステップ戻る */}
-          <button className="btn-back-sim" onClick={goBack}>← 変更</button>
-          <button className={`btn-plan ${showPlan ? 'active' : ''}`} onClick={() => setShowPlan(!showPlan)}>
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-              <rect x="1" y="1" width="12" height="12" rx="1" stroke="currentColor" strokeWidth="1.2"/>
-              <line x1="5" y1="1" x2="5" y2="13" stroke="currentColor" strokeWidth="1"/>
-              <line x1="1" y1="7" x2="13" y2="7" stroke="currentColor" strokeWidth="1"/>
-            </svg>
-            間取り図
+        <div className="sim-topbar-right">
+          <button className="sim-topbar-btn plain" onClick={openFlowCheck}>
+            <i className="ph ph-path" />
+            動線
           </button>
-          <button className="btn-summary" onClick={() => setShowSummary(true)}>プラン確認</button>
-          {/* #6: 確認ダイアログ経由にする */}
-          <button className="btn-restart" onClick={() => setShowResetConfirm(true)}>最初から</button>
-        </div>
-      </header>
-
-      {/* Room tabs — only show rooms for this plan type */}
-      <nav className="room-tabs">
-        {Object.entries(rooms).map(([id, room]) => (
-          <button
-            key={id}
-            className={`room-tab ${activeRoom === id ? 'active' : ''}`}
-            onClick={() => setSelectedRoom(id)}
-          >
-            <span className="tab-icon">{room.icon}</span>
-            <span className="tab-label">{room.label}</span>
-            <span className="tab-size">{room.size}</span>
+          <button className="sim-topbar-btn plain accent" onClick={openSummary}>
+            <i className="ph ph-file-text" />
+            プラン確認
           </button>
-        ))}
-      </nav>
+          <button className="sim-topbar-exit" onClick={goBack}>
+            <i className="ph ph-arrow-left" />
+            変更
+          </button>
+          <button className="sim-topbar-exit" onClick={() => setShowResetConfirm(true)}>
+            最初から
+          </button>
+        </div>
+      </div>
 
-      {/* Main layout */}
-      <main className="main-layout">
-        <aside className={`sidebar-plan ${showPlan ? 'open' : 'closed'}`}>
-          <FloorPlan />
-        </aside>
+      {/* 部屋キャプション */}
+      <div className="sim-caption">
+        <div className="sim-caption-name">{rooms[activeRoom]?.label}</div>
+        <div className="sim-caption-meta">
+          {rooms[activeRoom]?.size}・{rooms[activeRoom]?.area}
+        </div>
+      </div>
 
-        <section className="viewer-section">
-          <div className="viewer-hint-bar">
-            <span className="room-viewing-group">
-              <span className="room-viewing">
-                {rooms[activeRoom]?.icon} {rooms[activeRoom]?.label}
-                <span className="room-area-hint"> — {rooms[activeRoom]?.area}</span>
-              </span>
-            </span>
-            <span className="view-tip">ドラッグ: 視点変更 ／ スクロール: ズーム</span>
-          </div>
-          <div className="viewer-canvas">
-            <ViewerBoundary>
-              <Suspense fallback={<LoadingRoom />}>
-                <ApartmentViewerLazy
-                  planType={planType}
-                  furnitureTemplate={furnitureTemplate}
-                />
-              </Suspense>
-            </ViewerBoundary>
-          </div>
-
-          {/* 部屋タブ連動の実物設備写真ストリップ */}
-          {ROOM_PHOTOS[activeRoom] && (
-            <div className="photo-ref-strip">
-              <div className="photo-ref-header">
-                <span className="photo-ref-title">📷 実物設備写真</span>
-                <span className="photo-ref-caption">{ROOM_PHOTOS[activeRoom].caption}</span>
-              </div>
-              <div className="photo-ref-scroll">
-                <div className="photo-ref-item photo-ref-main-item">
-                  <img
-                    src={ROOM_PHOTOS[activeRoom].main}
-                    alt={ROOM_PHOTOS[activeRoom].caption}
-                    className="photo-ref-img"
-                    loading="lazy"
-                  />
-                  <span className="photo-ref-label">全体</span>
-                </div>
-                {ROOM_PHOTOS[activeRoom].details.map((d, i) => (
-                  <div key={i} className="photo-ref-item">
-                    <img src={d.src} alt={d.label} className="photo-ref-img" loading="lazy" />
-                    <span className="photo-ref-label">{d.label}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </section>
-
-        <aside className="sidebar-custom">
-          <CustomizationPanel planType={planType} />
-        </aside>
-      </main>
-
-      {showSummary && <SummaryModal onClose={() => setShowSummary(false)} planType={planType} furnitureTemplate={furnitureTemplate} />}
+      {/* 右のドック */}
+      <CustomizationPanel planType={planType} furnitureTemplate={furnitureTemplate} />
 
       {/* #6: 「最初から」確認ダイアログ */}
       {showResetConfirm && (
@@ -196,21 +149,21 @@ function Simulation() {
             <div className="guide-title">操作ガイド</div>
             <div className="guide-steps">
               <div className="guide-step">
-                <span className="guide-icon">🏠</span>
+                <i className="ph ph-armchair guide-icon" />
                 <div>
                   <div className="guide-step-title">部屋を切り替える</div>
-                  <div className="guide-step-desc">上のタブまたは左の間取り図をクリックして部屋を切り替えます</div>
+                  <div className="guide-step-desc">上部の部屋タブをクリックして部屋を切り替えます</div>
                 </div>
               </div>
               <div className="guide-step">
-                <span className="guide-icon">🎨</span>
+                <i className="ph ph-swatches guide-icon" />
                 <div>
                   <div className="guide-step-title">インテリアをカスタマイズ</div>
-                  <div className="guide-step-desc">右パネルで壁の色・床材・スタイル・照明を変更できます</div>
+                  <div className="guide-step-desc">右のパネルで壁の色・床材・スタイル・照明を変更できます</div>
                 </div>
               </div>
               <div className="guide-step">
-                <span className="guide-icon">🖱️</span>
+                <i className="ph ph-mouse-left-click guide-icon" />
                 <div>
                   <div className="guide-step-title">3Dビューの操作</div>
                   <div className="guide-step-desc">ドラッグで視点回転・スクロールでズームイン／アウト</div>
@@ -233,5 +186,7 @@ export default function App() {
   if (appStep === 'welcome')          return <WelcomeScreen />
   if (appStep === 'plan-select')      return <PlanSelector />
   if (appStep === 'furniture-select') return <FurnitureSelector />
+  if (appStep === 'flow-check')       return <FlowCheck />
+  if (appStep === 'summary')          return <SummaryScreen />
   return <Simulation />
 }

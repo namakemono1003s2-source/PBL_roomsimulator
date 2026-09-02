@@ -9,7 +9,7 @@ const WALL_MARGIN_M     = 0.05  // 壁から最低 50mm
 
 // ── AABB (Axis-Aligned Bounding Box) ─────────────────────────────────────────
 // size.width/depth は mm 単位、position は m 単位
-function getFurnitureAABB(piece) {
+export function getFurnitureAABB(piece) {
   const { position, size, rotation } = piece
   if (!size || !position) return null
   const hw = (size.width  / 1000) / 2
@@ -120,6 +120,53 @@ export function validatePlan(planRooms, planType) {
     if (w.length) results[roomId] = w
   })
   return results
+}
+
+// ── FLOW-CHECK 画面用: 家具ペア間の間隔を全件mm単位で返す ─────────────────────
+// しきい値: >=1100mm すれ違える / 600〜1099mm 一人が通れる / <600mm 狭い
+const PASS_TWO_MM = 1100
+const PASS_ONE_MM = 600
+
+// ラグ等、床に敷くだけで通行の妨げにならないカテゴリは通路幅の算出対象から除外する
+const NON_OBSTACLE_CATEGORIES = new Set(['rug'])
+
+// 同じ「家具セット」内の組み合わせ（例: ダイニングチェア同士、スツールとカウンター）は
+// 意図的に近接配置されるため、通路幅の指摘対象から除外する。
+const CLUSTER_PAIR_KEYS = new Set([
+  ['diningChair', 'diningChair'],
+  ['diningChair', 'diningTable'],
+  ['stool', 'counter'],
+  ['stool', 'island'],
+  ['stool', 'stool'],
+  ['nightstand', 'bed'],
+  ['nightstand', 'bedKing'],
+  ['nightstand', 'nightstand'],
+].map(pair => pair.slice().sort().join('|')))
+
+function isClusterPair(a, b) {
+  return CLUSTER_PAIR_KEYS.has([a, b].sort().join('|'))
+}
+
+export function computeClearanceReport(furniture) {
+  const obstacles = furniture.filter(p => !NON_OBSTACLE_CATEGORIES.has(p.category))
+  const boxes = obstacles.map(getFurnitureAABB).filter(Boolean)
+  const categoryById = Object.fromEntries(obstacles.map(p => [p.id, p.category]))
+  const report = []
+  for (let i = 0; i < boxes.length; i++) {
+    for (let j = i + 1; j < boxes.length; j++) {
+      if (isClusterPair(categoryById[boxes[i].id], categoryById[boxes[j].id])) continue
+      const gapM = aabbGap(boxes[i], boxes[j])
+      if (gapM <= 0) continue // 重なりは対象外（データ不整合として除外）
+      const mm = Math.round(gapM * 1000)
+      const level = mm >= PASS_TWO_MM ? 'ok2' : mm >= PASS_ONE_MM ? 'ok1' : 'tight'
+      report.push({
+        aId: boxes[i].id, aName: boxes[i].name,
+        bId: boxes[j].id, bName: boxes[j].name,
+        mm, level,
+      })
+    }
+  }
+  return report.sort((a, b) => a.mm - b.mm)
 }
 
 // ── コンソールレポート（開発時用）────────────────────────────────────────────

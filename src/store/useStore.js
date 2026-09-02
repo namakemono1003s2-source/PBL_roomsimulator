@@ -20,7 +20,7 @@ const INITIAL_ROOMS = {
   bedroom2: defaultRoom({ wallColor: '#E8DCCB', floorColor: '#D4A574' }),
   bedroom3: defaultRoom({ wallColor: '#F5F2EC', floorColor: '#D4A574' }),
   bathroom: defaultRoom({ wallColor: '#D4E4F0', floorColor: '#B0B0B0', floorType: 'tile', lighting: 'bright' }),
-  toilet:   defaultRoom({ wallColor: '#F0EEE8', floorColor: '#B0B0B0', floorType: 'tile', lighting: 'bright' }),
+  toilet:   defaultRoom({ wallColor: '#F5F2EC', floorColor: '#B0B0B0', floorType: 'tile', lighting: 'bright' }),
 }
 
 export const useStore = create((set) => ({
@@ -45,8 +45,13 @@ export const useStore = create((set) => ({
       ? { appStep: 'welcome' }
       : s.appStep === 'furniture-select'
       ? { appStep: 'plan-select', planType: null }
+      : s.appStep === 'flow-check' || s.appStep === 'summary'
+      ? { appStep: 'simulation' }
       : { appStep: 'furniture-select', furnitureTemplate: null }
   ),
+  // FLOW-CHECK（動線チェック）・SUMMARY（商談シート）は simulation から独立画面として開く
+  openFlowCheck: () => set({ appStep: 'flow-check' }),
+  openSummary:   () => set({ appStep: 'summary' }),
   // #12: resetToStartでroomsも初期値に戻す
   resetToStart: () => set({
     appStep: 'welcome',

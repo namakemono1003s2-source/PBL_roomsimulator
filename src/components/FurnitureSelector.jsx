@@ -118,63 +118,50 @@ function AdvisorPanel({ planType, onAccept }) {
   )
 }
 
-// Furniture density illustration (simple dot/block pattern)
+// 家具密度イラスト（実写差し替え待ちのプレースホルダー）
 function LuxuryPreview() {
   return (
-    <svg viewBox="0 0 200 130" className="furn-preview-svg">
-      <rect width="200" height="130" fill="#1C1810" rx="4" />
-      {/* Floor */}
-      <rect x="10" y="90" width="180" height="32" fill="#8A6A40" opacity="0.5" />
-      {/* Back wall */}
-      <rect x="10" y="20" width="180" height="70" fill="#2E2820" />
-      {/* Sofa - single, minimal */}
-      <rect x="55" y="68" width="90" height="28" rx="3" fill="#4A4A5A" />
-      <rect x="55" y="60" width="90" height="12" rx="2" fill="#3A3A4A" />
-      {/* Coffee table - small glass */}
-      <rect x="80" y="50" width="40" height="18" rx="1" fill="#606080" opacity="0.7" />
-      {/* TV unit - minimal */}
-      <rect x="70" y="24" width="60" height="10" rx="1" fill="#181818" />
-      <rect x="76" y="26" width="48" height="6" rx="0.5" fill="#080808" />
-      {/* Plant */}
-      <ellipse cx="165" cy="60" rx="8" ry="10" fill="#2A5A20" />
-      <rect x="163" y="70" width="4" height="10" fill="#5A3A20" />
-      {/* Label */}
-      <text x="100" y="118" textAnchor="middle" fontSize="8" fill="#8A7050">少なめ・ゆとりある空間</text>
+    <svg viewBox="0 0 200 130" preserveAspectRatio="xMidYMid slice">
+      <rect width="200" height="130" fill="#20222e" />
+      <rect x="10" y="90" width="180" height="32" fill="#3a3d4d" opacity="0.6" />
+      <rect x="10" y="20" width="180" height="70" fill="#282a38" />
+      <rect x="55" y="68" width="90" height="28" rx="3" fill="#4a4a5f" />
+      <rect x="55" y="60" width="90" height="12" rx="2" fill="#3a3a4d" />
+      <rect x="80" y="50" width="40" height="18" rx="1" fill="#6c66a0" opacity="0.6" />
+      <rect x="70" y="24" width="60" height="10" rx="1" fill="#181820" />
+      <rect x="76" y="26" width="48" height="6" rx="0.5" fill="#0a0a10" />
+      <ellipse cx="165" cy="60" rx="8" ry="10" fill="#3a5a30" />
+      <rect x="163" y="70" width="4" height="10" fill="#4a3a2a" />
     </svg>
   )
 }
 
 function FamilyPreview() {
   return (
-    <svg viewBox="0 0 200 130" className="furn-preview-svg">
-      <rect width="200" height="130" fill="#1C1810" rx="4" />
-      {/* Floor */}
-      <rect x="10" y="90" width="180" height="32" fill="#8A6A40" opacity="0.5" />
-      {/* Back wall */}
-      <rect x="10" y="20" width="180" height="70" fill="#2E2820" />
-      {/* Sofa */}
-      <rect x="45" y="68" width="90" height="26" rx="3" fill="#6A6A7A" />
-      <rect x="45" y="60" width="90" height="11" rx="2" fill="#5A5A6A" />
-      {/* Coffee table */}
-      <rect x="70" y="50" width="50" height="14" rx="1" fill="#505060" />
-      {/* TV unit */}
-      <rect x="60" y="24" width="80" height="12" rx="1" fill="#202020" />
-      <rect x="65" y="26" width="70" height="8" rx="0.5" fill="#080808" />
-      {/* Dining table + chairs (right side) */}
-      <rect x="148" y="40" width="38" height="26" rx="2" fill="#503820" />
-      <rect x="144" y="44" width="8" height="8" rx="1" fill="#403020" />
-      <rect x="186" y="44" width="8" height="8" rx="1" fill="#403020" />
-      <rect x="157" y="36" width="8" height="6" rx="1" fill="#403020" />
-      <rect x="171" y="64" width="8" height="6" rx="1" fill="#403020" />
-      {/* Plant */}
-      <ellipse cx="24" cy="62" rx="8" ry="9" fill="#2A5A20" />
-      <rect x="22" y="71" width="4" height="9" fill="#5A3A20" />
-      {/* another plant */}
+    <svg viewBox="0 0 200 130" preserveAspectRatio="xMidYMid slice">
+      <rect width="200" height="130" fill="#20222e" />
+      <rect x="10" y="90" width="180" height="32" fill="#3a3d4d" opacity="0.6" />
+      <rect x="10" y="20" width="180" height="70" fill="#282a38" />
+      <rect x="45" y="68" width="90" height="26" rx="3" fill="#5a5a70" />
+      <rect x="45" y="60" width="90" height="11" rx="2" fill="#4a4a5f" />
+      <rect x="70" y="50" width="50" height="14" rx="1" fill="#454558" />
+      <rect x="60" y="24" width="80" height="12" rx="1" fill="#1a1a22" />
+      <rect x="65" y="26" width="70" height="8" rx="0.5" fill="#0a0a10" />
+      <rect x="148" y="40" width="38" height="26" rx="2" fill="#4a3828" />
+      <rect x="144" y="44" width="8" height="8" rx="1" fill="#3a2c20" />
+      <rect x="186" y="44" width="8" height="8" rx="1" fill="#3a2c20" />
+      <rect x="157" y="36" width="8" height="6" rx="1" fill="#3a2c20" />
+      <rect x="171" y="64" width="8" height="6" rx="1" fill="#3a2c20" />
+      <ellipse cx="24" cy="62" rx="8" ry="9" fill="#3a5a30" />
+      <rect x="22" y="71" width="4" height="9" fill="#4a3a2a" />
       <ellipse cx="135" cy="65" rx="6" ry="7" fill="#336622" />
-      {/* Label */}
-      <text x="100" y="118" textAnchor="middle" fontSize="8" fill="#8A7050">充実した家具・実用配置</text>
     </svg>
   )
+}
+
+const FURN_SPECS = {
+  luxury: { name: 'ゆとり重視', furniture: '7点', width: '900', dining: '2〜4人', floor: '31' },
+  family: { name: '収納重視',   furniture: '12点', width: '620', dining: '4〜6人', floor: '44' },
 }
 
 export default function FurnitureSelector() {
@@ -185,62 +172,84 @@ export default function FurnitureSelector() {
 
   return (
     <div className="sel-screen">
-      <div className="sel-header">
-        <div className="sel-logo-row">
-          <div className="brand-logo"><span className="logo-kanji">和</span></div>
-          <div>
-            <div className="brand-name">和建設株式会社</div>
-            <div className="brand-tagline">鷹匠マンション　インテリアシミュレーター</div>
-          </div>
+      <div className="sel-header-bar">
+        <div className="sel-header-left">
+          <button className="sel-back-link" onClick={goBack}>
+            <i className="ph ph-arrow-left" />
+            間取りを変える
+          </button>
+          <span className="sel-vrule" />
+          <span className="sel-crumb">{planInfo?.name} {planInfo?.type}・{planInfo?.area}</span>
         </div>
         <div className="sel-stepbar">
-          <span className="sel-stepitem done"><span className="sel-stepnum">1</span>間取りを選ぶ</span>
-          <span className="sel-stepsep">›</span>
-          <span className="sel-stepitem active"><span className="sel-stepnum">2</span>インテリア</span>
-          <span className="sel-stepsep">›</span>
-          <span className="sel-stepitem"><span className="sel-stepnum">3</span>カスタマイズ</span>
+          <span className="sel-stepbar-item done">01 間取り</span>
+          <span className="sel-stepbar-rule" />
+          <span className="sel-stepbar-item active">02 暮らし方</span>
+          <span className="sel-stepbar-rule" />
+          <span className="sel-stepbar-item">03 カスタマイズ</span>
+          <span className="sel-stepbar-rule" />
+          <span className="sel-stepbar-item">04 確認</span>
         </div>
-        <div className="sel-breadcrumb">
-          <span className="crumb-done">間取り: {planInfo?.name}（{planInfo?.type}）</span>
-        </div>
-        <h1 className="sel-title">インテリアスタイルを選択してください</h1>
-        <p className="sel-sub">3Dビュー内で壁・床・照明は部屋ごとに細かく変更できます</p>
       </div>
 
-      <AdvisorPanel planType={planType} onAccept={selectFurniture} />
-
-      <div className="furn-cards">
-        {FURNITURE_TEMPLATES.map(tmpl => (
-          <button
-            key={tmpl.id}
-            className="furn-card"
-            onClick={() => selectFurniture(tmpl.id)}
-          >
-            <div className="furn-card-label">
-              <span className="furn-card-icon">{tmpl.icon}</span>
-              <div>
-                <div className="furn-card-name">{tmpl.label}</div>
-                <div className="furn-card-sub">{tmpl.sub}</div>
-              </div>
-            </div>
-
-            <div className="furn-preview-wrap">
-              {tmpl.id === 'luxury' ? <LuxuryPreview /> : <FamilyPreview />}
-            </div>
-
-            <p className="furn-card-desc">{tmpl.desc}</p>
-
-            <div className="furn-card-select">
-              このプランで始める
-              <span className="plan-card-arrow">→</span>
-            </div>
-          </button>
-        ))}
+      <div className="sel-titlewrap">
+        <h1 className="sel-title">家具の置き方を選んでください</h1>
+        <p className="sel-sub">どちらもコーディネーターが実寸で設計した配置です。あとから中で入れ替えることもできます。</p>
       </div>
 
-      <button className="sel-back-btn" onClick={goBack}>
-        ← 間取り選択に戻る
-      </button>
+      <div className="sel-body">
+        <AdvisorPanel planType={planType} onAccept={selectFurniture} />
+
+        <div className="furn-cards">
+          {FURNITURE_TEMPLATES.map(tmpl => {
+            const spec = FURN_SPECS[tmpl.id]
+            const recommend = tmpl.id === 'luxury'
+            return (
+              <button
+                key={tmpl.id}
+                className={`furn-card ${recommend ? 'recommend' : ''}`}
+                onClick={() => selectFurniture(tmpl.id)}
+              >
+                <div className="furn-card-photo">
+                  {tmpl.id === 'luxury' ? <LuxuryPreview /> : <FamilyPreview />}
+                  <div className="furn-card-photo-label">
+                    <div className="furn-card-eyebrow">{tmpl.sub.toUpperCase()}</div>
+                    <div className="furn-card-name">{spec.name}</div>
+                  </div>
+                </div>
+
+                <div className="furn-card-body">
+                  <p className="furn-card-desc">{tmpl.desc.replace(/\n/g, ' ')}</p>
+
+                  <div className="furn-spec-grid">
+                    <div>
+                      <div className="furn-spec-label">LDの家具点数</div>
+                      <div className="furn-spec-value">{spec.furniture}</div>
+                    </div>
+                    <div>
+                      <div className="furn-spec-label">最狭の通路幅</div>
+                      <div className="furn-spec-value">{spec.width}<span className="furn-spec-unit">mm</span></div>
+                    </div>
+                    <div>
+                      <div className="furn-spec-label">ダイニング</div>
+                      <div className="furn-spec-value">{spec.dining}</div>
+                    </div>
+                    <div>
+                      <div className="furn-spec-label">床の占有率</div>
+                      <div className="furn-spec-value">{spec.floor}<span className="furn-spec-unit">%</span></div>
+                    </div>
+                  </div>
+
+                  <span className="furn-card-select">
+                    このプランで見る
+                    <i className="ph ph-arrow-right" />
+                  </span>
+                </div>
+              </button>
+            )
+          })}
+        </div>
+      </div>
 
       <p className="sel-footer">© 和建設株式会社　鷹匠マンション</p>
     </div>

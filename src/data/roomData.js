@@ -135,41 +135,6 @@ export const LIGHTING_OPTIONS = [
   },
 ]
 
-// ── 実物設備写真（ビ・ウェル鷹匠 ザ・レジデンス公式サイトより） ──────────────
-const _P = 'https://www.kano-kensetsu.com/bewell/kochi/takajo-theresidence/img'
-
-export const ROOM_PHOTOS = {
-  living: {
-    main:    `${_P}/model_photo.jpg`,
-    caption: 'モデルルーム ダイニングキッチン',
-    details: [],
-  },
-  kitchen: {
-    main:    `${_P}/equipment/eq_kitchen_main.jpg`,
-    caption: 'モデルルーム キッチン',
-    details: [
-      { src: `${_P}/equipment/ki_01.jpg`, label: '静音シンク（Zシンク）' },
-      { src: `${_P}/equipment/ki_02.jpg`, label: 'ガラストップコンロ' },
-      { src: `${_P}/equipment/ki_03.jpg`, label: '浄水器一体型ハンドシャワー水栓' },
-      { src: `${_P}/equipment/ki_07.jpg`, label: '人造大理石天板' },
-      { src: `${_P}/equipment/ki_10.jpg`, label: '食器洗い乾燥機' },
-    ],
-  },
-  bathroom: {
-    main:    `${_P}/equipment/eq_bath_main.jpg`,
-    caption: 'モデルルーム バスルーム',
-    details: [
-      { src: `${_P}/equipment/ba_05.jpg`, label: 'カラリ床' },
-      { src: `${_P}/equipment/ba_08.jpg`, label: 'スマートカウンター' },
-      { src: `${_P}/equipment/ba_09.jpg`, label: 'スライドハンガー付バー' },
-      { src: `${_P}/equipment/ba_10.jpg`, label: 'コンフォートウェーブシャワー' },
-    ],
-  },
-}
-
-// LP・FurnitureSelector 用のギャラリー写真
-export const PROPERTY_GALLERY = [
-  { src: `${_P}/model_photo.jpg`,               label: 'ダイニングキッチン', sub: 'Dining Kitchen' },
-  { src: `${_P}/equipment/eq_kitchen_main.jpg`, label: 'キッチン',          sub: 'Kitchen'        },
-  { src: `${_P}/equipment/eq_bath_main.jpg`,    label: 'バスルーム',        sub: 'Bathroom'       },
-]
+// 旧ROOM_PHOTOS/PROPERTY_GALLERYは外部ドメイン（kano-kensetsu.com）直参照が
+// 応答不能になりページ全体のレンダリングを止める事故を起こしたため2026-09にUI再構築の際に削除。
+// 画像は自リポジトリの src/assets 配下に置くこと。

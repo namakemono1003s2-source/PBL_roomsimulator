@@ -3,6 +3,11 @@
 // 全座標はアパート中心原点のワールド座標 (m)
 
 import * as THREE from 'three'
+import { getToonGradientMap } from '../../utils/toonGradient'
+
+const GLOSSY_THRESHOLD = 0.15
+const OUTLINE_COLOR = '#232232'
+const OUTLINE_SCALE = 1.035
 
 // ── 素材色 ────────────────────────────────────────────────────────────────────
 const C = {
@@ -25,20 +30,45 @@ const C = {
 }
 
 // ── 共通メッシュ ──────────────────────────────────────────────────────────────
+// 2026-09: 「実写に寄せすぎるとモデルルームとのギャップが目立つ」との判断から、
+// 光沢のない一般パーツはセルシェーディング(トゥーン)+輪郭線で描画する。
+// 金属・鏡面などmetal値が高いパーツだけは、質感の対比のため光沢表現を残す。
 function B({ p=[0,0,0], r=0, s, c, rough=0.7, metal=0, sh=true }) {
+  const glossy = metal > GLOSSY_THRESHOLD
   return (
-    <mesh position={p} rotation={[0,r,0]} castShadow={sh} receiveShadow>
-      <boxGeometry args={s} />
-      <meshStandardMaterial color={c} roughness={rough} metalness={metal} />
-    </mesh>
+    <group position={p} rotation={[0,r,0]}>
+      {!glossy && (
+        <mesh scale={OUTLINE_SCALE}>
+          <boxGeometry args={s} />
+          <meshBasicMaterial color={OUTLINE_COLOR} side={THREE.BackSide} />
+        </mesh>
+      )}
+      <mesh castShadow={sh} receiveShadow>
+        <boxGeometry args={s} />
+        {glossy
+          ? <meshStandardMaterial color={c} roughness={rough} metalness={metal} />
+          : <meshToonMaterial color={c} gradientMap={getToonGradientMap()} />}
+      </mesh>
+    </group>
   )
 }
 function Cyl({ p=[0,0,0], r=0, args, c, rough=0.7, metal=0 }) {
+  const glossy = metal > GLOSSY_THRESHOLD
   return (
-    <mesh position={p} rotation={[0,r,0]} castShadow>
-      <cylinderGeometry args={args} />
-      <meshStandardMaterial color={c} roughness={rough} metalness={metal} />
-    </mesh>
+    <group position={p} rotation={[0,r,0]}>
+      {!glossy && (
+        <mesh scale={OUTLINE_SCALE} castShadow>
+          <cylinderGeometry args={args} />
+          <meshBasicMaterial color={OUTLINE_COLOR} side={THREE.BackSide} />
+        </mesh>
+      )}
+      <mesh castShadow>
+        <cylinderGeometry args={args} />
+        {glossy
+          ? <meshStandardMaterial color={c} roughness={rough} metalness={metal} />
+          : <meshToonMaterial color={c} gradientMap={getToonGradientMap()} />}
+      </mesh>
+    </group>
   )
 }
 
@@ -52,7 +82,7 @@ function Sofa({ p=[0,0,0], rot=Math.PI/2 }) {
       {[[-W/2+0.1,-D/2+0.1],[W/2-0.1,-D/2+0.1],[-W/2+0.1,D/2-0.1],[W/2-0.1,D/2-0.1]].map(([x,z],i)=>(
         <mesh key={i} position={[x,legH/2,z]} castShadow>
           <boxGeometry args={[0.07,legH,0.07]} />
-          <meshStandardMaterial color={C.walnut} roughness={0.6} />
+          <meshToonMaterial color={C.walnut} gradientMap={getToonGradientMap()} />
         </mesh>
       ))}
       {/* 座面 */}
@@ -118,7 +148,7 @@ function FloorLamp({ p=[0,0,0] }) {
       {/* シェード */}
       <mesh position={[0.6,2.28,0]} castShadow>
         <cylinderGeometry args={[0.20,0.26,0.28,24,1,true]} />
-        <meshStandardMaterial color="#F8F4EE" roughness={0.85} side={THREE.DoubleSide} />
+        <meshToonMaterial color="#F8F4EE" gradientMap={getToonGradientMap()} side={THREE.DoubleSide} />
       </mesh>
     </group>
   )
@@ -133,7 +163,7 @@ function Plant({ p=[0,0,0], h=1.2 }) {
       {[[0,h,0,0.24],[0.14,h*0.8,0.1,0.18],[-0.1,h*0.9,-0.12,0.16],[0,h*1.1,0,0.14]].map(([x,y,z,r],i)=>(
         <mesh key={i} position={[x,y,z]} castShadow>
           <sphereGeometry args={[r,8,6]} />
-          <meshStandardMaterial color={C.green} roughness={0.9} />
+          <meshToonMaterial color={C.green} gradientMap={getToonGradientMap()} />
         </mesh>
       ))}
     </group>
@@ -200,7 +230,7 @@ function Rug({ p=[0,0,0], size=[2.4,1.8], color=C.rug }) {
   return (
     <mesh position={[p[0],0.007,p[2]]} rotation={[-Math.PI/2,0,0]} receiveShadow>
       <planeGeometry args={size} />
-      <meshStandardMaterial color={color} roughness={0.98} />
+      <meshToonMaterial color={color} gradientMap={getToonGradientMap()} />
     </mesh>
   )
 }

@@ -1,26 +1,58 @@
 // primitives.jsx — 手続き型家具メッシュ（GLBモデル未設定時のフォールバック描画）
-// RoomViewer.jsx からそのまま移動。ロジック変更なし。
+// RoomViewer.jsx からそのまま移動。
+//
+// 2026-09: 「実写に寄せすぎるとモデルルームとのギャップが目立つ」という判断から、
+// 家具本体はセルシェーディング（アニメ調のトゥーン影）+ 輪郭線で描画するように変更。
+// 金属・ガラスなど光沢のあるパーツ(metal値が高いもの)だけは、質感の対比を出すために
+// 従来どおりmeshStandardMaterialで光沢を残す。
 
+import * as THREE from 'three'
 import { RoundedBox } from '@react-three/drei'
+import { getToonGradientMap } from '../../utils/toonGradient'
+
+// この値を超える metal 指定は「光沢パーツ」とみなし、トゥーン化せず金属/ガラス表現を維持する
+const GLOSSY_THRESHOLD = 0.15
+const OUTLINE_COLOR = '#232232'
+const OUTLINE_SCALE = 1.035
 
 // ── Furniture primitives ─────────────────────────────────────────────────────
 function Box({ pos=[0,0,0], rot=0, size, color, rough=0.6, metal=0 }) {
+  const glossy = metal > GLOSSY_THRESHOLD
   return (
-    <mesh position={pos} rotation={[0,rot,0]} castShadow receiveShadow>
-      <boxGeometry args={size} />
-      <meshStandardMaterial color={color} roughness={rough} metalness={metal} />
-    </mesh>
+    <group position={pos} rotation={[0,rot,0]}>
+      {!glossy && (
+        <mesh scale={OUTLINE_SCALE}>
+          <boxGeometry args={size} />
+          <meshBasicMaterial color={OUTLINE_COLOR} side={THREE.BackSide} />
+        </mesh>
+      )}
+      <mesh castShadow receiveShadow>
+        <boxGeometry args={size} />
+        {glossy
+          ? <meshStandardMaterial color={color} roughness={rough} metalness={metal} />
+          : <meshToonMaterial color={color} gradientMap={getToonGradientMap()} />}
+      </mesh>
+    </group>
   )
 }
 
 // 角丸ボックス（ソファ・テーブルトップ等の視認面に使用）
 function RBox({ pos=[0,0,0], rot=0, size, color, rough=0.6, metal=0 }) {
   const r = Math.min(size[0], size[1], size[2]) * 0.06
+  const glossy = metal > GLOSSY_THRESHOLD
   return (
-    <RoundedBox args={size} radius={r} smoothness={3}
-      position={pos} rotation={[0,rot,0]} castShadow receiveShadow>
-      <meshStandardMaterial color={color} roughness={rough} metalness={metal} />
-    </RoundedBox>
+    <group position={pos} rotation={[0,rot,0]}>
+      {!glossy && (
+        <RoundedBox args={size} radius={r} smoothness={3} scale={OUTLINE_SCALE}>
+          <meshBasicMaterial color={OUTLINE_COLOR} side={THREE.BackSide} />
+        </RoundedBox>
+      )}
+      <RoundedBox args={size} radius={r} smoothness={3} castShadow receiveShadow>
+        {glossy
+          ? <meshStandardMaterial color={color} roughness={rough} metalness={metal} />
+          : <meshToonMaterial color={color} gradientMap={getToonGradientMap()} />}
+      </RoundedBox>
+    </group>
   )
 }
 

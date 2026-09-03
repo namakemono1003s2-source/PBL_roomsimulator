@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import * as THREE from 'three'
 import { LAYOUTS } from '../../data/apartmentLayout'
+import { getToonGradientMap } from '../../utils/toonGradient'
 import {
   computeWallSegments,
   windowVerticalExtent,
@@ -89,8 +90,6 @@ function RoomFloor({ room, config, selected, onSelect }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [floorType, floorColor]
   )
-  const roughness = { tile: 0.15, carpet: 0.92, wood: 0.55 }[floorType] ?? 0.55
-
   return (
     <mesh
       rotation={[-Math.PI / 2, 0, 0]}
@@ -99,10 +98,9 @@ function RoomFloor({ room, config, selected, onSelect }) {
       onClick={room.clickable ? (e) => { e.stopPropagation(); onSelect(room.id) } : undefined}
     >
       <planeGeometry args={[room.w - 0.08, room.d - 0.08]} />
-      <meshStandardMaterial
+      <meshToonMaterial
         map={tex}
-        roughness={roughness}
-        metalness={floorType === 'tile' ? 0.04 : 0}
+        gradientMap={getToonGradientMap()}
         emissive={selected ? '#FFF4C0' : '#000000'}
         emissiveIntensity={selected ? 0.18 : 0}
       />
@@ -124,7 +122,7 @@ function WindowPane({ win }) {
       {/* フレーム */}
       <mesh rotation={rot}>
         <planeGeometry args={[win.w + 0.12, win.h + 0.10]} />
-        <meshStandardMaterial color="#E8E2D8" roughness={0.6} side={THREE.DoubleSide} />
+        <meshToonMaterial color="#E8E2D8" gradientMap={getToonGradientMap()} side={THREE.DoubleSide} />
       </mesh>
       {/* ガラス */}
       <mesh rotation={rot} position={win.face === 'x' ? [-0.04, 0, 0] : [0, 0, 0.04]}>
@@ -155,7 +153,7 @@ function DoorPanel({ door }) {
       {/* 扉パネル: 開口と同一サイズ */}
       <mesh castShadow receiveShadow>
         <boxGeometry args={[door.w, door.h, 0.045]} />
-        <meshStandardMaterial color="#8B6842" roughness={0.55} metalness={0.04} />
+        <meshToonMaterial color="#8B6842" gradientMap={getToonGradientMap()} />
       </mesh>
       {/* ドアノブ */}
       <mesh position={[knobSide[0], 0, 0.03]}>
@@ -178,7 +176,7 @@ export default function ApartmentShell({ planType, rooms, selectedRoom, onSelect
       {/* 地面 (アパート外周より少し広い) */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.002, 0]} receiveShadow>
         <planeGeometry args={[layout.footprint.w + 5, layout.footprint.d + 5]} />
-        <meshStandardMaterial color="#C8C0B0" roughness={0.96} />
+        <meshToonMaterial color="#C8C0B0" gradientMap={getToonGradientMap()} />
       </mesh>
 
       {/* 廊下・非居住ゾーンの床 (中間色。room.floorColorで個別上書き可) */}
@@ -190,7 +188,7 @@ export default function ApartmentShell({ planType, rooms, selectedRoom, onSelect
           receiveShadow
         >
           <planeGeometry args={[room.w - 0.08, room.d - 0.08]} />
-          <meshStandardMaterial color={room.floorColor ?? '#E8E2DA'} roughness={0.8} />
+          <meshToonMaterial color={room.floorColor ?? '#E8E2DA'} gradientMap={getToonGradientMap()} />
         </mesh>
       ))}
 
@@ -198,7 +196,7 @@ export default function ApartmentShell({ planType, rooms, selectedRoom, onSelect
       {layout.commonCorridor && (
         <mesh rotation={[-Math.PI / 2, 0, 0]} position={[layout.commonCorridor.x, -0.01, layout.commonCorridor.z]}>
           <planeGeometry args={[layout.commonCorridor.w, layout.commonCorridor.d]} />
-          <meshStandardMaterial color="#DDD8CE" roughness={0.9} />
+          <meshToonMaterial color="#DDD8CE" gradientMap={getToonGradientMap()} />
         </mesh>
       )}
 
@@ -235,7 +233,7 @@ export default function ApartmentShell({ planType, rooms, selectedRoom, onSelect
           return (
             <mesh key={`${i}-${j}`} position={position} receiveShadow castShadow>
               <boxGeometry args={boxArgs} />
-              <meshStandardMaterial color={WALL_COLOR} roughness={0.88} />
+              <meshToonMaterial color={WALL_COLOR} gradientMap={getToonGradientMap()} />
             </mesh>
           )
         })
@@ -274,28 +272,28 @@ export default function ApartmentShell({ planType, rooms, selectedRoom, onSelect
             {!skipNorthWall && panelSegments('N').map((seg, j) => (
               <mesh key={`n-${j}`} position={[seg.alongCenter, (seg.yBottom + seg.yTop) / 2, -hd + 0.06]}>
                 <planeGeometry args={[seg.alongLength, seg.yTop - seg.yBottom]} />
-                <meshStandardMaterial color={wallColor} roughness={0.88} side={THREE.FrontSide} />
+                <meshToonMaterial color={wallColor} gradientMap={getToonGradientMap()} side={THREE.FrontSide} />
               </mesh>
             ))}
             {/* 南内壁 */}
             {!skipSouthWall && panelSegments('S').map((seg, j) => (
               <mesh key={`s-${j}`} position={[seg.alongCenter, (seg.yBottom + seg.yTop) / 2, hd - 0.06]} rotation={[0, Math.PI, 0]}>
                 <planeGeometry args={[seg.alongLength, seg.yTop - seg.yBottom]} />
-                <meshStandardMaterial color={wallColor} roughness={0.88} side={THREE.FrontSide} />
+                <meshToonMaterial color={wallColor} gradientMap={getToonGradientMap()} side={THREE.FrontSide} />
               </mesh>
             ))}
             {/* 西内壁 */}
             {panelSegments('W').map((seg, j) => (
               <mesh key={`w-${j}`} position={[-hw + 0.06, (seg.yBottom + seg.yTop) / 2, seg.alongCenter]} rotation={[0, Math.PI / 2, 0]}>
                 <planeGeometry args={[seg.alongLength, seg.yTop - seg.yBottom]} />
-                <meshStandardMaterial color={wallColor} roughness={0.88} side={THREE.FrontSide} />
+                <meshToonMaterial color={wallColor} gradientMap={getToonGradientMap()} side={THREE.FrontSide} />
               </mesh>
             ))}
             {/* 東内壁 */}
             {!skipEastWall && panelSegments('E').map((seg, j) => (
               <mesh key={`e-${j}`} position={[hw - 0.06, (seg.yBottom + seg.yTop) / 2, seg.alongCenter]} rotation={[0, -Math.PI / 2, 0]}>
                 <planeGeometry args={[seg.alongLength, seg.yTop - seg.yBottom]} />
-                <meshStandardMaterial color={wallColor} roughness={0.88} side={THREE.FrontSide} />
+                <meshToonMaterial color={wallColor} gradientMap={getToonGradientMap()} side={THREE.FrontSide} />
               </mesh>
             ))}
           </group>
@@ -316,7 +314,7 @@ export default function ApartmentShell({ planType, rooms, selectedRoom, onSelect
       {layout.balcony && (
         <mesh rotation={[-Math.PI / 2, 0, 0]} position={[layout.balcony.x, -0.015, layout.balcony.z]}>
           <planeGeometry args={[layout.balcony.w, layout.balcony.d]} />
-          <meshStandardMaterial color="#D8D2C4" roughness={0.92} />
+          <meshToonMaterial color="#D8D2C4" gradientMap={getToonGradientMap()} />
         </mesh>
       )}
 

@@ -1,175 +1,190 @@
-import { useState, useMemo } from 'react'
+import { useState } from 'react'
 import { useStore } from '../store/useStore'
-import { PLAN_ROOMS, WALL_COLORS, FLOOR_OPTIONS, STYLE_OPTIONS, LIGHTING_OPTIONS } from '../data/roomData'
-import { getInteriorPlan } from '../data/interiorPlans'
-import { computeClearanceReport } from '../utils/designRules'
+import { PLAN_ROOMS, WALL_COLORS, FLOOR_OPTIONS, STYLE_OPTIONS, MOOD_PALETTES, LIGHTING_OPTIONS } from '../data/roomData'
 
-// 照明ごとの色温度テキスト
-const LIGHTING_HINT = {
-  bright:  '5000K 昼白色',
-  morning: '4200K 朝の光',
-  warm:    '2700K 電球色',
-  soft:    '3000K 温白色',
-  evening: '2200K 夕暮れ色',
-  night:   '2000K 常夜灯',
+// 明るい色の上には濃いチェック、暗い色の上には明るいチェックを置く（色だけで選択状態を表さないためのルール）
+function checkColorFor(hex) {
+  if (!/^#[0-9A-Fa-f]{6}$/.test(hex)) return '#2b2741'
+  const r = parseInt(hex.slice(1, 3), 16), g = parseInt(hex.slice(3, 5), 16), b = parseInt(hex.slice(5, 7), 16)
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
+  return luminance > 0.6 ? '#2b2741' : '#f0eefe'
 }
 
-// 主要4つ（朝・昼・夕・夜）を優先表示し、電球色・やわらかは補助チップへ
 const PRIMARY_LIGHTING_IDS = ['morning', 'bright', 'evening', 'night']
+const LIGHTING_HINT = {
+  bright: '5000K 昼白色', morning: '4200K 朝の光', warm: '2700K 電球色',
+  soft: '3000K 温白色', evening: '2200K 夕暮れ色', night: '2000K 常夜灯',
+}
 
-export default function CustomizationPanel({ planType, furnitureTemplate }) {
-  const [tab, setTab] = useState('interior') // 'interior' | 'light'
+function Swatch({ color, name, selected, size = 44, onClick }) {
+  return (
+    <button
+      className={`dock-swatch ${selected ? 'selected' : ''}`}
+      style={{ background: color, width: size, height: size }}
+      title={name}
+      aria-label={name}
+      onClick={onClick}
+    >
+      {selected && <i className="ph ph-check" style={{ color: checkColorFor(color) }} />}
+    </button>
+  )
+}
+
+export default function CustomizationPanel({ planType, furnitureTemplate, open, onToggle }) {
   const selectedRoom = useStore(s => s.selectedRoom)
   const config       = useStore(s => s.rooms[selectedRoom])
   const updateRoom   = useStore(s => s.updateRoom)
   const rooms        = PLAN_ROOMS[planType] || {}
   const room         = rooms[selectedRoom]
 
+  const [wallExpanded, setWallExpanded] = useState(false)
+  const [floorExpanded, setFloorExpanded] = useState(false)
+
   const update = (key, value) => updateRoom(selectedRoom, key, value)
 
-  const selectedWallName = WALL_COLORS.find(c => c.value === config.wallColor)?.name || ''
-  const primaryLighting   = LIGHTING_OPTIONS.filter(l => PRIMARY_LIGHTING_IDS.includes(l.id))
-  const secondaryLighting = LIGHTING_OPTIONS.filter(l => !PRIMARY_LIGHTING_IDS.includes(l.id))
+  const applyMood = (moodId) => {
+    const palette = MOOD_PALETTES[moodId]
+    update('style', moodId)
+    if (palette) {
+      update('wallColor', palette.walls[0])
+      const floorName = FLOOR_OPTIONS.find(f => f.color === palette.floors[0])
+      update('floorColor', palette.floors[0])
+      if (floorName) update('floorType', floorName.type)
+    }
+    setWallExpanded(false)
+    setFloorExpanded(false)
+  }
 
-  // この部屋の最狭通路幅（実際の家具配置データから算出）
-  const narrowest = useMemo(() => {
-    const furniture = getInteriorPlan(planType, furnitureTemplate, selectedRoom, config.style)
-    const report = computeClearanceReport(furniture)
-    return report[0] || null
-  }, [planType, furnitureTemplate, selectedRoom, config.style])
+  const moodPalette = MOOD_PALETTES[config.style] || MOOD_PALETTES.modern
+  const wallOptions  = wallExpanded  ? WALL_COLORS.map(c => c.value)               : moodPalette.walls
+  const floorOptions = floorExpanded ? FLOOR_OPTIONS.map(f => f.color)             : moodPalette.floors
+
+  const selectedWallName  = WALL_COLORS.find(c => c.value === config.wallColor)?.name || ''
+  const selectedFloorName = FLOOR_OPTIONS.find(f => f.color === config.floorColor)?.name || ''
+  const primaryLighting   = LIGHTING_OPTIONS.filter(l => PRIMARY_LIGHTING_IDS.includes(l.id))
+
+  if (!open) {
+    return (
+      <button className="sim-panel dock-collapsed-tab" onClick={onToggle} aria-label="パネルを開く">
+        <i className="ph ph-sidebar-simple" />
+        <span className="dock-collapsed-label">部屋をつくる</span>
+      </button>
+    )
+  }
 
   return (
-    <div className="sim-dock">
-      <div className="dock-tabs">
-        <button className={`dock-tab ${tab === 'interior' ? 'active' : ''}`} onClick={() => setTab('interior')}>内装</button>
-        <button className={`dock-tab ${tab === 'light' ? 'active' : ''}`} onClick={() => setTab('light')}>光</button>
+    <div className="sim-panel sim-dock">
+      <div className="dock-head">
+        <h3 className="dock-title">{room?.label}をつくる</h3>
+        <button className="dock-collapse-btn" onClick={onToggle} aria-label="パネルを閉じる">
+          <i className="ph ph-sidebar-simple" />
+        </button>
       </div>
 
-      {tab === 'interior' && (
-        <>
-          <div className="dock-section">
-            <div className="dock-section-head">
-              <span className="dock-section-label">壁</span>
-              <span className="dock-section-value">{selectedWallName}</span>
-            </div>
-            <div className="dock-swatches">
-              {WALL_COLORS.map(c => (
-                <button
-                  key={c.value}
-                  className={`dock-swatch ${config.wallColor === c.value ? 'selected' : ''}`}
-                  style={{ background: c.value }}
-                  title={c.name}
-                  aria-label={c.name}
-                  onClick={() => update('wallColor', c.value)}
-                />
-              ))}
-            </div>
+      <div className="dock-scroll">
+        {/* 雰囲気 — 最上位の意思決定 */}
+        <div className="dock-section">
+          <div className="dock-section-head">
+            <span className="dock-section-label">この部屋の雰囲気</span>
+            <span className="dock-section-value">{STYLE_OPTIONS.find(s => s.id === config.style)?.label}</span>
           </div>
-
-          <div className="dock-section">
-            <div className="dock-section-head">
-              <span className="dock-section-label">床</span>
-              <span className="dock-section-value">
-                {FLOOR_OPTIONS.find(f => f.color === config.floorColor)?.name || ''}
-              </span>
-            </div>
-            <div className="dock-floor-grid">
-              {FLOOR_OPTIONS.map((f, i) => (
-                <button
-                  key={i}
-                  className={`dock-floor-btn ${config.floorColor === f.color ? 'selected' : ''}`}
-                  style={{ background: f.color }}
-                  title={f.name}
-                  aria-label={f.name}
-                  onClick={() => { update('floorColor', f.color); update('floorType', f.type) }}
-                />
-              ))}
-            </div>
-          </div>
-
-          <div className="dock-section">
-            <div className="dock-section-head">
-              <span className="dock-section-label">インテリアスタイル</span>
-              <span className="dock-section-value">
-                {STYLE_OPTIONS.find(s => s.id === config.style)?.label || ''}
-              </span>
-            </div>
-            <div className="dock-timechips">
-              {STYLE_OPTIONS.map(s => (
-                <button
-                  key={s.id}
-                  className={`dock-timechip ${config.style === s.id ? 'selected' : ''}`}
-                  onClick={() => update('style', s.id)}
-                >
-                  {s.label}
+          <div className="mood-grid">
+            {STYLE_OPTIONS.map(s => {
+              const selected = config.style === s.id
+              return (
+                <button key={s.id} className={`mood-card ${selected ? 'selected' : ''}`} onClick={() => applyMood(s.id)}>
+                  {selected && <i className="ph ph-check-circle mood-check" />}
+                  <div className="mood-name">{s.label}</div>
+                  <div className="mood-desc">{s.desc}</div>
                 </button>
-              ))}
-            </div>
+              )
+            })}
           </div>
-
-          <button className="dock-reset-btn" onClick={() => {
-            update('wallColor', '#F5F2EC'); update('floorColor', '#C8956C'); update('floorType', 'wood')
-            update('style', 'modern'); update('lighting', 'warm'); update('ceilingColor', '#FFFFFF')
-          }}>
-            この部屋をリセット
-          </button>
-        </>
-      )}
-
-      {tab === 'light' && (
-        <>
-          <div className="dock-section">
-            <div className="dock-section-head">
-              <span className="dock-section-label">時間帯</span>
-              <span className="dock-section-value">{LIGHTING_HINT[config.lighting]}</span>
-            </div>
-            <div className="dock-timechips">
-              {primaryLighting.map(l => (
-                <button
-                  key={l.id}
-                  className={`dock-timechip ${config.lighting === l.id ? 'selected' : ''}`}
-                  onClick={() => update('lighting', l.id)}
-                >
-                  {l.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="dock-section">
-            <div className="dock-section-head">
-              <span className="dock-section-label">その他の光</span>
-            </div>
-            <div className="dock-timechips">
-              {secondaryLighting.map(l => (
-                <button
-                  key={l.id}
-                  className={`dock-timechip ${config.lighting === l.id ? 'selected' : ''}`}
-                  onClick={() => update('lighting', l.id)}
-                >
-                  {l.label}
-                </button>
-              ))}
-            </div>
-          </div>
-        </>
-      )}
-
-      {narrowest && (
-        <div className="dock-footer">
-          <div className="dock-footer-row">
-            <span className="dock-footer-label">{narrowest.aName}〜{narrowest.bName}</span>
-            <span className="dock-footer-value">{narrowest.mm}mm</span>
-          </div>
-          <p className="dock-footer-note">
-            {narrowest.level === 'ok2'
-              ? '二人がすれ違える幅です。'
-              : narrowest.level === 'ok1'
-              ? '一人が通れる幅です。すれ違うには1,100mm必要。'
-              : 'やや狭くなっています。「動線」で詳しく確認できます。'}
-          </p>
+          <p className="dock-hint">選ぶと壁・床がまとまって変わります。下は、その雰囲気で成立する色だけを出しています。</p>
         </div>
-      )}
+
+        <hr className="rule-tight" />
+
+        {/* 壁 */}
+        <div className="dock-section">
+          <div className="dock-section-head">
+            <span className="dock-section-label">壁の色</span>
+            <span className="dock-section-value">{selectedWallName}</span>
+          </div>
+          <div className="dock-swatches">
+            {wallOptions.map(hex => {
+              const meta = WALL_COLORS.find(c => c.value === hex)
+              return (
+                <Swatch key={hex} color={hex} name={meta?.name || hex}
+                  selected={config.wallColor === hex} onClick={() => update('wallColor', hex)} />
+              )
+            })}
+            {!wallExpanded && (
+              <button className="dock-swatch-add" onClick={() => setWallExpanded(true)} aria-label="すべての壁色を見る">
+                <i className="ph ph-dots-three" />
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* 床 */}
+        <div className="dock-section">
+          <div className="dock-section-head">
+            <span className="dock-section-label">床材</span>
+            <span className="dock-section-value">{selectedFloorName}</span>
+          </div>
+          <div className="dock-floor-grid">
+            {floorOptions.map(hex => {
+              const meta = FLOOR_OPTIONS.find(f => f.color === hex)
+              const selected = config.floorColor === hex
+              return (
+                <button
+                  key={hex}
+                  className={`dock-floor-btn ${selected ? 'selected' : ''}`}
+                  style={{ background: hex }}
+                  title={meta?.name}
+                  aria-label={meta?.name}
+                  onClick={() => { update('floorColor', hex); if (meta) update('floorType', meta.type) }}
+                >
+                  {selected && <i className="ph ph-check" style={{ color: checkColorFor(hex) }} />}
+                </button>
+              )
+            })}
+            {!floorExpanded && (
+              <button className="dock-floor-btn dock-swatch-add" onClick={() => setFloorExpanded(true)} aria-label="すべての床材を見る">
+                <i className="ph ph-dots-three" />
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* 光の入り方 */}
+        <div className="dock-section">
+          <div className="dock-section-head">
+            <span className="dock-section-label">光の入り方</span>
+            <span className="dock-section-value">{LIGHTING_HINT[config.lighting]}</span>
+          </div>
+          <div className="dock-timechips">
+            {primaryLighting.map(l => (
+              <button
+                key={l.id}
+                className={`dock-timechip ${config.lighting === l.id ? 'selected' : ''}`}
+                onClick={() => update('lighting', l.id)}
+              >
+                {l.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <button className="dock-reset-btn" onClick={() => {
+          update('wallColor', '#F5F2EC'); update('floorColor', '#D4A574'); update('floorType', 'wood')
+          update('style', 'modern'); update('lighting', 'warm'); update('ceilingColor', '#FFFFFF')
+          setWallExpanded(false); setFloorExpanded(false)
+        }}>
+          この部屋をリセット
+        </button>
+      </div>
     </div>
   )
 }

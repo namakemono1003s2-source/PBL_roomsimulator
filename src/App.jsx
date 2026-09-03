@@ -4,9 +4,11 @@ import WelcomeScreen from './components/WelcomeScreen'
 import PlanSelector from './components/PlanSelector'
 import FurnitureSelector from './components/FurnitureSelector'
 import CustomizationPanel from './components/CustomizationPanel'
+import Minimap from './components/Minimap'
+import ClearanceReadout from './components/ClearanceReadout'
 import FlowCheck from './components/FlowCheck'
 import SummaryScreen from './components/SummaryScreen'
-import { PLAN_ROOMS, PLAN_INFO, FURNITURE_TEMPLATES } from './data/roomData'
+import { PLAN_ROOMS, PLAN_INFO, FURNITURE_TEMPLATES, ROOM_ICON } from './data/roomData'
 import interiorTheme from './assets/interior-theme.png'
 
 const ApartmentViewerLazy = lazy(() => import('./components/ApartmentViewer'))
@@ -47,9 +49,11 @@ function Simulation() {
 
   // #6: 「最初から」確認ダイアログ
   const [showResetConfirm, setShowResetConfirm] = useState(false)
-  // #5: 初回操作ガイド（localStorage で一度だけ表示）
+  // #5: 初回操作ガイド（localStorage で一度だけ表示。何か1つでも操作したら即座に消える）
   const [showGuide, setShowGuide] = useState(() => !localStorage.getItem('sim-guide-seen'))
-  const dismissGuide = () => { localStorage.setItem('sim-guide-seen', '1'); setShowGuide(false) }
+  const dismissGuide = () => { if (!localStorage.getItem('sim-guide-seen')) { localStorage.setItem('sim-guide-seen', '1'); setShowGuide(false) } }
+  // 右パネルの開閉（3Dを圧迫しないための折りたたみ）
+  const [panelOpen, setPanelOpen] = useState(true)
 
   const planInfo  = PLAN_INFO[planType]
   const rooms     = PLAN_ROOMS[planType]
@@ -61,7 +65,7 @@ function Simulation() {
   if (activeRoom !== selectedRoom) setSelectedRoom(activeRoom)
 
   return (
-    <div className="sim-stage">
+    <div className="sim-stage" onPointerDown={dismissGuide} onWheel={dismissGuide}>
       {/* 背景（本番では Three.js キャンバスがここに入るため、画像は光の参考として敷く） */}
       <div className="sim-stage-bg">
         <img src={interiorTheme} alt="" />
@@ -94,6 +98,7 @@ function Simulation() {
               className={`sim-roomtab ${activeRoom === id ? 'active' : ''}`}
               onClick={() => setSelectedRoom(id)}
             >
+              <i className={`ph ${ROOM_ICON[id] || 'ph-square'}`} />
               <span className="tab-label">{room.label}</span>
             </button>
           ))}
@@ -126,8 +131,19 @@ function Simulation() {
         </div>
       </div>
 
-      {/* 右のドック */}
-      <CustomizationPanel planType={planType} furnitureTemplate={furnitureTemplate} />
+      {/* 右のドック（開閉可能） */}
+      <CustomizationPanel
+        planType={planType}
+        furnitureTemplate={furnitureTemplate}
+        open={panelOpen}
+        onToggle={() => setPanelOpen(o => !o)}
+      />
+
+      {/* 左下: 間取りミニマップ＋通路幅の常時表示 */}
+      <div className="sim-bottomleft">
+        <Minimap planType={planType} />
+        <ClearanceReadout planType={planType} furnitureTemplate={furnitureTemplate} />
+      </div>
 
       {/* #6: 「最初から」確認ダイアログ */}
       {showResetConfirm && (
@@ -142,38 +158,14 @@ function Simulation() {
         </div>
       )}
 
-      {/* #5: 初回操作ガイド */}
+      {/* #5: 初回操作ガイド — 3D中央に控えめな一列で表示し、何か操作したら即座に消える */}
       {showGuide && (
-        <div className="guide-overlay" onClick={dismissGuide}>
-          <div className="guide-box" onClick={e => e.stopPropagation()}>
-            <div className="guide-title">操作ガイド</div>
-            <div className="guide-steps">
-              <div className="guide-step">
-                <i className="ph ph-armchair guide-icon" />
-                <div>
-                  <div className="guide-step-title">部屋を切り替える</div>
-                  <div className="guide-step-desc">上部の部屋タブをクリックして部屋を切り替えます</div>
-                </div>
-              </div>
-              <div className="guide-step">
-                <i className="ph ph-swatches guide-icon" />
-                <div>
-                  <div className="guide-step-title">インテリアをカスタマイズ</div>
-                  <div className="guide-step-desc">右のパネルで壁の色・床材・スタイル・照明を変更できます</div>
-                </div>
-              </div>
-              <div className="guide-step">
-                <i className="ph ph-mouse-left-click guide-icon" />
-                <div>
-                  <div className="guide-step-title">3Dビューの操作</div>
-                  <div className="guide-step-desc">ドラッグで視点回転・スクロールでズームイン／アウト</div>
-                </div>
-              </div>
-            </div>
-            <button className="guide-start-btn" onClick={dismissGuide}>
-              シミュレーションを始める →
-            </button>
-          </div>
+        <div className="sim-panel guide-hint">
+          <i className="ph-light ph-mouse-left-click" />
+          <span>ドラッグで見回す</span>
+          <span className="guide-hint-sep" />
+          <i className="ph-light ph-magnifying-glass-plus" />
+          <span>スクロールで近づく</span>
         </div>
       )}
     </div>

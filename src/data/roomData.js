@@ -76,6 +76,35 @@ export const STYLE_OPTIONS = [
   { id: 'classic',      label: 'クラシック', desc: '伝統的で重厚感ある上質な空間' },
 ]
 
+// 「雰囲気（スタイル）」ごとに成立する壁色・床材を4色ずつに絞ったパレット。
+// Simulationの右パネルで「まず雰囲気を決め、次に微調整する」という階層を作るために使う。
+// 値は WALL_COLORS / FLOOR_OPTIONS に実在する色のみを参照する（新しい色は増やさない）。
+export const MOOD_PALETTES = {
+  modern: {
+    walls:  ['#E0DDD8', '#F5F2EC', '#2C3E50', '#8A8A8A'],
+    floors: ['#D4A574', '#B0B0B0', '#F0F0F0', '#7A4A2A'],
+  },
+  scandinavian: {
+    walls:  ['#F5F2EC', '#D8EDE6', '#D4E4F0', '#F0E8D0'],
+    floors: ['#E0C08A', '#D4A574', '#E8E4D8', '#F0F0F0'],
+  },
+  natural: {
+    walls:  ['#E8DCCB', '#F0E8D0', '#3A6B4A', '#F5F2EC'],
+    floors: ['#D4A574', '#E0C08A', '#E8E4D8', '#7A4A2A'],
+  },
+  classic: {
+    walls:  ['#8A8A8A', '#2C3E50', '#3A6B4A', '#E0DDD8'],
+    floors: ['#7A4A2A', '#4A3020', '#D4A574', '#B0B0B0'],
+  },
+}
+
+// 部屋タブ用アイコン（Phosphor Icons）
+export const ROOM_ICON = {
+  living: 'ph-armchair', kitchen: 'ph-cooking-pot',
+  bedroom: 'ph-bed', bedroom2: 'ph-bed', bedroom3: 'ph-bed',
+  bathroom: 'ph-shower', toilet: 'ph-toilet',
+}
+
 // color: 室内ライト色, intensity: 室内光強度
 // skyColor: Canvas背景(空の色), sunColor: 窓から差し込む太陽光色, sunIntensity: 太陽光強度係数
 export const LIGHTING_OPTIONS = [

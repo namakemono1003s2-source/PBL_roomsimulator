@@ -6,6 +6,8 @@ import { useStore } from '../../store/useStore'
 import ApartmentShell from './ApartmentShell'
 import ApartmentFurniture from './ApartmentFurniture'
 import { LAYOUTS } from '../../data/apartmentLayout'
+import { LIGHTING_OPTIONS } from '../../data/roomData'
+import InteriorPlanFurniture from './InteriorPlanFurniture'
 
 // 部屋タブを切り替えると、カメラがその部屋へ寄っていく（420ms・イージング）。
 // 移動の軌跡そのものが部屋どうしの位置関係を伝えるため、瞬間移動はさせない。
@@ -39,7 +41,8 @@ function AnimatedCameraRig({ planType, selectedRoom }) {
     // トイレのような極小の部屋では、実寸そのままだと壁に近づきすぎるため下限を設ける
     const effW = Math.max(room.w, 1.8), effD = Math.max(room.d, 1.8)
     const halfW = effW / 2, halfD = effD / 2
-    const height = Math.max(effW, effD) * 0.85 + 1.0
+    // キッチンのような細長い部屋でも設備全体が見えるよう、少し引き気味にする
+    const height = Math.max(effW, effD) * 0.95 + 1.3
 
     fromPos.current.copy(camera.position)
     fromLook.current.copy(controlsRef.current.target)
@@ -86,19 +89,25 @@ export default function ApartmentViewer({ planType, furnitureTemplate }) {
   // アイソメトリック気味の俯瞰カメラ (SE方向から)
   const cam = [span * 0.62, span * 1.08, span * 0.72]
 
+  // 選択中の部屋の「光の入り方」(朝/昼/夕/夜)を、実際のライティングへ反映する。
+  // これまでこの値はラベル表示にのみ使われ、3D側の見た目には一切反映されていなかった。
+  const lightingId = rooms[selectedRoom]?.lighting || 'warm'
+  const lighting = LIGHTING_OPTIONS.find(l => l.id === lightingId) || LIGHTING_OPTIONS[2]
+
   return (
     <Canvas
       shadows
       camera={{ position: cam, fov: 46, near: 0.1, far: 120 }}
       gl={{ antialias: true, alpha: false, toneMapping: 4, toneMappingExposure: 1.05 }}
-      style={{ background: '#B8CCD8' }}
+      style={{ background: lighting.skyColor, transition: 'background 0.6s ease' }}
     >
+      <color attach="background" args={[lighting.skyColor]} />
       <Suspense fallback={null}>
-        {/* 主光源: 太陽光 (北西上方) */}
+        {/* 主光源: 太陽光（北西上方）— 色・強さを「光の入り方」の設定に合わせる */}
         <directionalLight
           position={[-6, 16, -8]}
-          intensity={1.6}
-          color="#FFF8EE"
+          intensity={lighting.sunIntensity * 0.6}
+          color={lighting.sunColor}
           castShadow
           shadow-mapSize={[1024, 1024]}
           shadow-camera-left={-14}
@@ -108,9 +117,9 @@ export default function ApartmentViewer({ planType, furnitureTemplate }) {
           shadow-bias={-0.0004}
         />
         {/* 補助光: 東から柔らか */}
-        <directionalLight position={[10, 8, 6]} intensity={0.45} color="#FFE8C8" />
+        <directionalLight position={[10, 8, 6]} intensity={lighting.sunIntensity * 0.16} color={lighting.sunColor} />
         {/* アンビエント */}
-        <ambientLight intensity={0.5} color="#E8F0F8" />
+        <ambientLight intensity={lighting.intensity * 0.4} color={lighting.color} />
 
         <ApartmentShell
           planType={planType}
@@ -120,6 +129,7 @@ export default function ApartmentViewer({ planType, furnitureTemplate }) {
         />
 
         <ApartmentFurniture planType={planType} />
+        <InteriorPlanFurniture planType={planType} furnitureTemplate={furnitureTemplate} rooms={rooms} />
 
         <ContactShadows
           position={[0, 0.004, 0]}

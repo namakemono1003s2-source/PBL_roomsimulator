@@ -403,43 +403,14 @@ function Desk({ p=[0,0,0], rot=0 }) {
 function ITypeFurniture() {
   return (
     <>
-      {/* ════ LDリビングゾーン (南側 z≈+2.0→+4.66) ════ */}
-      <Rug  p={[-1.40, 0, +3.50]} size={[2.5,1.85]} color={C.rug} />
-      {/* ソファ: 西壁(x=-3.68)沿い, 東向き  back=x-3.62, center x=-3.17 */}
-      <Sofa p={[-3.17, 0, +3.50]} rot={Math.PI/2} />
-      {/* コーヒーテーブル */}
-      <CoffeeTable p={[-1.60, 0, +3.50]} />
-      {/* TVユニット: LD東端(x≈+1.28), スクリーン西向き */}
-      <TVUnit p={[+0.90, 0, +3.50]} rot={-Math.PI/2} />
-      {/* フロアランプ: LD南西角 */}
-      <FloorLamp p={[-3.35, 0, +4.30]} />
-      {/* 観葉植物: LD南東角 */}
-      <Plant p={[+0.70, 0, +4.30]} h={1.3} />
-
-      {/* ════ LDダイニングゾーン (北側 z≈+0.88→+2.2) ════ */}
-      <DiningTable p={[-1.80, 0, +1.65]} />
-      <DiningChair p={[-1.80, 0, +1.10]} rot={Math.PI} />
-      <DiningChair p={[-1.80, 0, +2.22]} rot={0} />
-      <DiningChair p={[-2.48, 0, +1.65]} rot={Math.PI/2} />
-      <DiningChair p={[-1.12, 0, +1.65]} rot={-Math.PI/2} />
-
-      {/* ════ キッチン x[-3.68,-0.80] z[-1.16,+0.88] ════ */}
-      <KitchenCounter p={[-2.23, 0, -0.83]} rot={0} w={2.0} d={0.58} />
+      {/* LD・ダイニング・キッチンのカウンター・各洋室のベッド類・浴室の設備は
+          InteriorPlanFurniture.jsx が interiorPlans データ(選んだ家具プラン・
+          部屋ごとのスタイル)から動的に描画する。ここには「収納・玄関・共用部の
+          固定設備」など、プラン選択に関わらず変わらないものだけを残す。 */}
       <Refrigerator p={[-3.31, 0, -0.44]} rot={0} />
 
-      {/* ════ 洋室① (6.1帖) x[-3.68,-0.80] z[-4.72,-1.16] ════ */}
-      <Bed  p={[-2.23, 0, -3.60]} rot={0} bw={1.40} color={C.cream} headColor={C.walnut} />
       <Wardrobe p={[-1.14, 0, -3.00]} rot={-Math.PI/2} w={1.60} />
-      <SideTable p={[-3.35, 0, -3.60]} />
-
-      {/* ════ 洋室② (4.3帖) x[+1.28,+3.68] z[-4.72,-1.64] ════ */}
-      <Bed  p={[+2.48, 0, -3.60]} rot={0} bw={1.05} color={C.blue} headColor={'#2A3040'} />
-      <Desk p={[+3.29, 0, -2.30]} rot={-Math.PI/2} />
-
-      {/* ════ 洋室③ (6.7帖) x[+1.28,+3.68] z[+0.04,+4.72] ════ */}
-      <Bed  p={[+2.48, 0, +1.10]} rot={0} bw={1.40} color={C.bedWhite} headColor={'#2E1A0A'} />
       <Wardrobe p={[+3.26, 0, +3.50]} rot={-Math.PI/2} w={1.60} />
-      <SideTable p={[+1.68, 0, +1.10]} />
 
       {/* ════ トイレ x[+0.48,+1.28] z[-2.15,-1.30] ════ */}
       <ToiletFixture p={[0.88, 0, -1.42]} rot={0} />
@@ -479,22 +450,9 @@ function ITypeFurniture() {
 function HTypeFurniture() {
   return (
     <>
-      <Rug p={[+0.60, 0, -1.80]} size={[2.2,1.6]} color={C.rug} />
-      <Sofa p={[+0.20, 0, -2.10]} rot={0} />
-      <CoffeeTable p={[+0.20, 0, -1.20]} />
-      <TVUnit p={[+0.20, 0, -3.30]} rot={Math.PI} />
-      <DiningTable p={[+1.60, 0, -0.60]} />
-      <DiningChair p={[+1.60, 0, +0.06]} rot={Math.PI} />
-      <DiningChair p={[+1.60, 0, -1.26]} rot={0} />
-      <DiningChair p={[+0.92, 0, -0.60]} rot={Math.PI/2} />
-      <DiningChair p={[+2.28, 0, -0.60]} rot={-Math.PI/2} />
-      <KitchenCounter p={[+1.00, 0, -3.25]} rot={0} w={3.00} d={0.56} />
+      {/* LDK・洋室のベッド類は InteriorPlanFurniture.jsx が担当。ここは固定設備のみ。 */}
       <Refrigerator p={[-0.60, 0, -2.90]} rot={0} />
-      <Plant p={[+2.70, 0, -2.90]} h={1.1} />
-      {/* 洋室 */}
-      <Bed p={[+1.02, 0, +2.00]} rot={0} bw={1.40} color={C.cream} />
       <Wardrobe p={[+2.72, 0, +2.90]} rot={-Math.PI/2} w={1.40} />
-      <SideTable p={[+0.28, 0, +2.00]} />
     </>
   )
 }

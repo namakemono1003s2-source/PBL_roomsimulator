@@ -200,7 +200,7 @@ export const rooms = {
       manufacturer: "カリモク",
       modelUrl: null,
       size: { width: 980, depth: 460, height: 1100 },
-      position: { x: -1.8, y: 0, z: -1.3 },
+      position: { x: -1.6, y: 0, z: -1.3 },
       rotation: { y: 90 },
       scale: 1,
       material: { color: "#E4D8C0", accent: "#C0A060" },

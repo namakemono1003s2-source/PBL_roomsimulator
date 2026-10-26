@@ -11,7 +11,7 @@ import {
 } from './wallOpenings'
 
 // ── 床テクスチャ生成 ──────────────────────────────────────────────────────────
-function makeFloorTexture(floorType, hexColor) {
+export function makeFloorTexture(floorType, hexColor) {
   const safeHex = /^#[0-9A-Fa-f]{6}$/.test(hexColor) ? hexColor : '#C0A880'
   const size = 512
   const canvas = document.createElement('canvas')
@@ -42,11 +42,15 @@ function makeFloorTexture(floorType, hexColor) {
     }
   } else {
     const plankH = 76
+    // 板の継ぎ目(2px)が透明=黒にならないよう、先に目地の色で塗っておく
+    ctx.fillStyle = rgb(hr-25, hg-20, hb-15)
+    ctx.fillRect(0, 0, size, size)
     for (let row = 0; row*plankH < size+plankH; row++) {
       const y0 = row*plankH
       const offset = (row%3)*(size/3)
       const colW = size/2
-      for (let col = -1; col <= 2; col++) {
+      // offset が最大(2/3幅)の段でも左端まで板が届くよう、col は -2 から描く
+      for (let col = -2; col <= 2; col++) {
         const x0 = col*colW + offset
         const vary = (Math.random()-0.5)*22
         ctx.fillStyle = rgb(hr+vary, hg+vary*0.8, hb+vary*0.6)
@@ -109,7 +113,7 @@ function RoomFloor({ room, config, selected, onSelect }) {
 }
 
 // ── 窓ガラスパネル ─────────────────────────────────────────────────────────────
-function WindowPane({ win }) {
+export function WindowPane({ win }) {
   // face='z' → z軸に垂直な壁に埋め込まれた窓 (南壁/北壁)
   // face='x' → x軸に垂直な壁に埋め込まれた窓 (東壁/西壁)
   const rot = win.face === 'x' ? [0, Math.PI / 2, 0] : [0, 0, 0]
@@ -143,7 +147,7 @@ function WindowPane({ win }) {
 }
 
 // ── ドアパネル ────────────────────────────────────────────────────────────────
-function DoorPanel({ door }) {
+export function DoorPanel({ door }) {
   // face='x' → x軸に垂直な壁の開口(幅はz方向) / face='z' → z軸に垂直な壁の開口(幅はx方向)
   const rot = door.face === 'x' ? [0, Math.PI / 2, 0] : [0, 0, 0]
   const knobSide = door.face === 'x' ? [0, 0, door.w / 2 - 0.08] : [door.w / 2 - 0.08, 0, 0]
@@ -243,10 +247,6 @@ export default function ApartmentShell({ planType, rooms, selectedRoom, onSelect
       {layout.rooms.filter(r => r.clickable).map(room => {
         const wallColor = rooms[room.id]?.wallColor ?? '#F5F2EC'
         const hw = room.w / 2, hd = room.d / 2, rh = room.h
-        // Iタイプ: K/LD間・廊下/LD間・K/廊下間の壁を撤去したため、該当面は描画しない。
-        const skipSouthWall = planType === 'I' && room.id === 'kitchen'
-        const skipEastWall  = planType === 'I' && room.id === 'kitchen'
-        const skipNorthWall = planType === 'I' && room.id === 'living'
 
         const panelSegments = (side) => {
           const isNS = side === 'N' || side === 'S'
@@ -269,14 +269,14 @@ export default function ApartmentShell({ planType, rooms, selectedRoom, onSelect
         return (
           <group key={`wp-${room.id}`} position={[room.x, 0, room.z]}>
             {/* 北内壁 */}
-            {!skipNorthWall && panelSegments('N').map((seg, j) => (
+            {panelSegments('N').map((seg, j) => (
               <mesh key={`n-${j}`} position={[seg.alongCenter, (seg.yBottom + seg.yTop) / 2, -hd + 0.06]}>
                 <planeGeometry args={[seg.alongLength, seg.yTop - seg.yBottom]} />
                 <meshToonMaterial color={wallColor} gradientMap={getToonGradientMap()} side={THREE.FrontSide} />
               </mesh>
             ))}
             {/* 南内壁 */}
-            {!skipSouthWall && panelSegments('S').map((seg, j) => (
+            {panelSegments('S').map((seg, j) => (
               <mesh key={`s-${j}`} position={[seg.alongCenter, (seg.yBottom + seg.yTop) / 2, hd - 0.06]} rotation={[0, Math.PI, 0]}>
                 <planeGeometry args={[seg.alongLength, seg.yTop - seg.yBottom]} />
                 <meshToonMaterial color={wallColor} gradientMap={getToonGradientMap()} side={THREE.FrontSide} />
@@ -290,7 +290,7 @@ export default function ApartmentShell({ planType, rooms, selectedRoom, onSelect
               </mesh>
             ))}
             {/* 東内壁 */}
-            {!skipEastWall && panelSegments('E').map((seg, j) => (
+            {panelSegments('E').map((seg, j) => (
               <mesh key={`e-${j}`} position={[hw - 0.06, (seg.yBottom + seg.yTop) / 2, seg.alongCenter]} rotation={[0, -Math.PI / 2, 0]}>
                 <planeGeometry args={[seg.alongLength, seg.yTop - seg.yBottom]} />
                 <meshToonMaterial color={wallColor} gradientMap={getToonGradientMap()} side={THREE.FrontSide} />

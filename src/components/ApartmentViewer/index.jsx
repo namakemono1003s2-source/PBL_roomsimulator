@@ -4,10 +4,10 @@ import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { OrbitControls, ContactShadows } from '@react-three/drei'
 import { useStore } from '../../store/useStore'
 import ApartmentShell from './ApartmentShell'
+import PlanShell from './PlanShell'
 import ApartmentFurniture from './ApartmentFurniture'
 import { LAYOUTS } from '../../data/apartmentLayout'
 import { LIGHTING_OPTIONS } from '../../data/roomData'
-import InteriorPlanFurniture from './InteriorPlanFurniture'
 
 // 部屋タブを切り替えると、カメラがその部屋へ寄っていく（420ms・イージング）。
 // 移動の軌跡そのものが部屋どうしの位置関係を伝えるため、瞬間移動はさせない。
@@ -42,7 +42,7 @@ function AnimatedCameraRig({ planType, selectedRoom }) {
     const effW = Math.max(room.w, 1.8), effD = Math.max(room.d, 1.8)
     const halfW = effW / 2, halfD = effD / 2
     // キッチンのような細長い部屋でも設備全体が見えるよう、少し引き気味にする
-    const height = Math.max(effW, effD) * 0.95 + 1.3
+    const height = Math.max(effW, effD) * 1.1 + 2.6
 
     fromPos.current.copy(camera.position)
     fromLook.current.copy(controlsRef.current.target)
@@ -87,7 +87,9 @@ export default function ApartmentViewer({ planType, furnitureTemplate }) {
   const fp = layout.footprint
   const span = Math.max(fp.w, fp.d)
   // アイソメトリック気味の俯瞰カメラ (SE方向から)
-  const cam = [span * 0.62, span * 1.08, span * 0.72]
+  // URLに ?view=top を付けると真上から見下ろす（平面図との見比べ用）
+  const topView = new URLSearchParams(window.location.search).get('view') === 'top'
+  const cam = topView ? [0, span * 2.4, 0.001] : [span * 0.62, span * 1.08, span * 0.72]
 
   // 選択中の部屋の「光の入り方」(朝/昼/夕/夜)を、実際のライティングへ反映する。
   // これまでこの値はラベル表示にのみ使われ、3D側の見た目には一切反映されていなかった。
@@ -121,15 +123,26 @@ export default function ApartmentViewer({ planType, furnitureTemplate }) {
         {/* アンビエント */}
         <ambientLight intensity={lighting.intensity * 0.4} color={lighting.color} />
 
-        <ApartmentShell
-          planType={planType}
-          rooms={rooms}
-          selectedRoom={selectedRoom}
-          onSelectRoom={setSelectedRoom}
-        />
-
-        <ApartmentFurniture planType={planType} />
-        <InteriorPlanFurniture planType={planType} furnitureTemplate={furnitureTemplate} rooms={rooms} />
+        {/* 平面図データから組み立てる型(I)は、壁・収納・作り付け設備まで PlanShell が描く */}
+        {layout.fromPlan ? (
+          <PlanShell
+            layout={layout}
+            rooms={rooms}
+            selectedRoom={selectedRoom}
+            onSelectRoom={setSelectedRoom}
+          />
+        ) : (
+          <>
+            <ApartmentShell
+              planType={planType}
+              rooms={rooms}
+              selectedRoom={selectedRoom}
+              onSelectRoom={setSelectedRoom}
+            />
+            <ApartmentFurniture planType={planType} />
+          </>
+        )}
+        {/* 家具（InteriorPlanFurniture）は 2026-10-27 から非表示。新しい間取りに合わせて形と配置を作り直してから戻す */}
 
         <ContactShadows
           position={[0, 0.004, 0]}

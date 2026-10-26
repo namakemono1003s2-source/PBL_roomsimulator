@@ -33,7 +33,7 @@ const C = {
 // 2026-09: 「実写に寄せすぎるとモデルルームとのギャップが目立つ」との判断から、
 // 光沢のない一般パーツはセルシェーディング(トゥーン)+輪郭線で描画する。
 // 金属・鏡面などmetal値が高いパーツだけは、質感の対比のため光沢表現を残す。
-function B({ p=[0,0,0], r=0, s, c, rough=0.7, metal=0, sh=true }) {
+export function B({ p=[0,0,0], r=0, s, c, rough=0.7, metal=0, sh=true }) {
   const glossy = metal > GLOSSY_THRESHOLD
   return (
     <group position={p} rotation={[0,r,0]}>
@@ -277,111 +277,6 @@ function SideTable({ p=[0,0,0] }) {
 }
 
 // トイレ設備 (便器)
-function ToiletFixture({ p=[0,0,0], rot=0 }) {
-  return (
-    <group position={p} rotation={[0,rot,0]}>
-      <B p={[0,0.19,0]} s={[0.38,0.38,0.46]} c={'#FFFFFF'} rough={0.25} />
-      <B p={[0,0.46,-0.15]} s={[0.34,0.20,0.14]} c={'#F4F4F4'} rough={0.2} />
-    </group>
-  )
-}
-
-// シューズボックス (玄関収納)
-function ShoeCabinet({ p=[0,0,0], rot=0, w=0.6 }) {
-  return (
-    <group position={p} rotation={[0,rot,0]}>
-      <B p={[0,0.52,0]} s={[w,1.05,0.28]} c={'#E8E2D8'} rough={0.65} />
-      {[0.20,0.60,0.90].map((y,i)=>(
-        <B key={i} p={[0,y,0.145]} s={[w-0.04,0.01,0.01]} c={'#C0BAB0'} rough={0.5} sh={false} />
-      ))}
-    </group>
-  )
-}
-
-// CL (built-in壁面収納・浅型)
-function BuiltinCloset({ p=[0,0,0], rot=0, w=0.6, h=2.0 }) {
-  return (
-    <group position={p} rotation={[0,rot,0]}>
-      <B p={[0,h/2,0]} s={[w,h,0.25]} c={'#EDE8DE'} rough={0.7} />
-      <Cyl p={[w/2-0.06,h/2,0.14]} args={[0.010,0.010,0.10,8]} c={C.chrome} rough={0.1} metal={0.9} />
-    </group>
-  )
-}
-
-// 可動棚収納 (棚板が見える収納)
-function ShelfStorage({ p=[0,0,0], rot=0, w=0.6, h=2.0 }) {
-  return (
-    <group position={p} rotation={[0,rot,0]}>
-      <B p={[0,h/2,0]} s={[w,h,0.30]} c={'#E4DED2'} rough={0.75} />
-      {[0.35,0.75,1.15,1.55].map((y,i)=>(
-        <B key={i} p={[0,y,0.02]} s={[w-0.04,0.02,0.26]} c={'#D0C8B8'} rough={0.6} sh={false} />
-      ))}
-    </group>
-  )
-}
-
-// 洗濯機置場
-function WashingMachine({ p=[0,0,0], rot=0 }) {
-  return (
-    <group position={p} rotation={[0,rot,0]}>
-      <B p={[0,0.42,0]} s={[0.62,0.84,0.62]} c={'#F2F2F0'} rough={0.35} metal={0.1} />
-      <mesh position={[0,0.40,0.32]} rotation={[Math.PI/2,0,0]}>
-        <cylinderGeometry args={[0.20,0.20,0.02,20]} />
-        <meshStandardMaterial color={'#C8CCD0'} roughness={0.15} metalness={0.3} />
-      </mesh>
-    </group>
-  )
-}
-
-// PS (パイプスペース)
-function PipeShaft({ p=[0,0,0], h=2.2 }) {
-  return <B p={[p[0],h/2,p[2]]} s={[0.30,h,0.30]} c={'#B8B4AC'} rough={0.85} />
-}
-
-// MB (メーターボックス・外部設置)
-function MeterBox({ p=[0,0,0], rot=0 }) {
-  return (
-    <group position={p} rotation={[0,rot,0]}>
-      <B p={[0,1.40,0]} s={[0.32,0.40,0.10]} c={'#D8D4CC'} rough={0.5} metal={0.15} />
-      <B p={[0,1.40,0.06]} s={[0.28,0.36,0.01]} c={'#B0ACA4'} rough={0.4} metal={0.3} sh={false} />
-    </group>
-  )
-}
-
-// SK (屋外小型シンク)
-function UtilitySink({ p=[0,0,0], rot=0 }) {
-  return (
-    <group position={p} rotation={[0,rot,0]}>
-      <Cyl p={[0,0.36,0]} args={[0.03,0.04,0.72,10]} c={'#909090'} rough={0.4} metal={0.5} />
-      <mesh position={[0,0.78,0]} castShadow>
-        <boxGeometry args={[0.42,0.16,0.34]} />
-        <meshStandardMaterial color={'#E8E8E4'} roughness={0.3} metalness={0.05} />
-      </mesh>
-      <Cyl p={[0,0.98,-0.10]} args={[0.014,0.014,0.24,8]} c={C.chrome} rough={0.05} metal={0.95} />
-    </group>
-  )
-}
-
-// 備蓄倉庫内の棚
-function StorageShelfUnit({ p=[0,0,0], rot=0, w=0.85 }) {
-  return (
-    <group position={p} rotation={[0,rot,0]}>
-      {[0.30,0.65,1.00,1.35,1.70].map((y,i)=>(
-        <B key={i} p={[0,y,0]} s={[w,0.03,0.55]} c={'#C8BEA8'} rough={0.7} />
-      ))}
-      {[-w/2+0.03,w/2-0.03].map((x,i)=>(
-        <B key={i} p={[x,0.90,0]} s={[0.05,1.80,0.55]} c={'#B0A488'} rough={0.7} />
-      ))}
-    </group>
-  )
-}
-
-// ポーチの装飾ピラー
-function PorchPillar({ p=[0,0,0], h=2.0 }) {
-  return <Cyl p={[p[0],h/2,p[2]]} args={[0.06,0.07,h,10]} c={'#D8D2C4'} rough={0.6} />
-}
-
-// デスク
 function Desk({ p=[0,0,0], rot=0 }) {
   return (
     <group position={p} rotation={[0,rot,0]}>
@@ -390,57 +285,6 @@ function Desk({ p=[0,0,0], rot=0 }) {
         <B key={i} p={[x,0.36,z]} s={[0.04,0.72,0.04]} c={C.walnut} rough={0.6} />
       ))}
     </group>
-  )
-}
-
-// ── I型配置 (間取り図実測値に修正済み) ──────────────────────────────────────
-// LD:  x[-3.68,+1.28]  z[+0.88,+4.72]
-// K:   x[-3.68,-0.80]  z[-1.16,+0.88]
-// BR1: x[-3.68,-0.80]  z[-4.72,-1.16]
-// BR2: x[+1.28,+3.68]  z[-4.72,-1.64]  ★修正: 旧z_south=-2.32→-1.64
-// BathZone: x[+1.28,+3.68] z[-1.64,+0.04]
-// BR3: x[+1.28,+3.68]  z[+0.04,+4.72]  ★修正: 旧z_north=+0.84→+0.04
-function ITypeFurniture() {
-  return (
-    <>
-      {/* LD・ダイニング・キッチンのカウンター・各洋室のベッド類・浴室の設備は
-          InteriorPlanFurniture.jsx が interiorPlans データ(選んだ家具プラン・
-          部屋ごとのスタイル)から動的に描画する。ここには「収納・玄関・共用部の
-          固定設備」など、プラン選択に関わらず変わらないものだけを残す。 */}
-      <Refrigerator p={[-3.31, 0, -0.44]} rot={0} />
-
-      <Wardrobe p={[-1.14, 0, -3.00]} rot={-Math.PI/2} w={1.60} />
-      <Wardrobe p={[+3.26, 0, +3.50]} rot={-Math.PI/2} w={1.60} />
-
-      {/* ════ トイレ x[+0.48,+1.28] z[-2.15,-1.30] ════ */}
-      <ToiletFixture p={[0.88, 0, -1.42]} rot={0} />
-
-      {/* ════ 玄関 (シューズボックス・東壁沿い) ════ */}
-      <ShoeCabinet p={[1.13, 0, -4.30]} rot={Math.PI/2} w={0.6} />
-
-      {/* ════ 洋室② CL (北壁沿い) ════ */}
-      <BuiltinCloset p={[3.35, 0, -4.535]} rot={0} w={0.7} h={2.2} />
-
-      {/* ════ 廊下: 可動棚収納・CL×2 (東壁=浴室ゾーン側に沿って) ════ */}
-      <ShelfStorage    p={[1.12, 0, 0.00]} rot={Math.PI/2} w={0.6} h={2.0} />
-      <BuiltinCloset   p={[1.12, 0, 0.40]} rot={Math.PI/2} w={0.6} h={2.0} />
-      <BuiltinCloset   p={[1.12, 0, 0.80]} rot={Math.PI/2} w={0.6} h={2.0} />
-
-      {/* ════ 廊下: 洗濯機置場・PS ════ */}
-      <WashingMachine p={[0.20, 0, -0.95]} rot={0} />
-      <PipeShaft      p={[0.85, 0, -0.60]} h={2.2} />
-
-      {/* ════ 備蓄倉庫 x[+2.68,+3.68] z[-5.52,-4.72] ════ */}
-      <StorageShelfUnit p={[3.18, 0, -5.19]} rot={0} w={0.85} />
-
-      {/* ════ ポーチ (装飾ピラー) ════ */}
-      <PorchPillar p={[-0.20, 0, -5.55]} h={2.0} />
-      <PorchPillar p={[+0.68, 0, -5.55]} h={2.0} />
-
-      {/* ════ MB (メーターボックス・外部) / SK (屋外シンク) ════ */}
-      <MeterBox    p={[3.75, 0, -4.90]} rot={0} />
-      <UtilitySink p={[3.35, 0, 5.65]}  rot={0} />
-    </>
   )
 }
 
@@ -458,7 +302,6 @@ function HTypeFurniture() {
 }
 
 export default function ApartmentFurniture({ planType }) {
-  if (planType === 'I') return <ITypeFurniture />
   if (planType === 'H') return <HTypeFurniture />
   return null
 }

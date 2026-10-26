@@ -29,6 +29,11 @@ import { LAYOUTS } from '../../data/apartmentLayout'
 // 備蓄倉庫などの固定設備は対象外。ApartmentFurniture.jsx 側の固定描画のまま）。
 const DATA_DRIVEN_ROOM_IDS = ['living', 'kitchen', 'bedroom', 'bedroom2', 'bedroom3', 'bathroom']
 
+// 平面図データから組み立てる型(layout.fromPlan)では、キッチン・浴槽・洗面台・トイレは
+// 作り付けの設備として PlanShell が平面図どおりの位置に描くため、家具データ側の同種の品は描かない。
+// （3.1帖の対面キッチンにアイランドは置けないので、アイランドとスツールも除く）
+const BUILT_IN_CATEGORIES = new Set(['counter', 'island', 'stool', 'bathtub', 'vanity', 'toilet'])
+
 export default function InteriorPlanFurniture({ planType, furnitureTemplate, rooms }) {
   const layout = LAYOUTS[planType]
   if (!layout || !furnitureTemplate) return null
@@ -41,6 +46,7 @@ export default function InteriorPlanFurniture({ planType, furnitureTemplate, roo
 
         const style = rooms?.[roomId]?.style
         const furniture = getInteriorPlan(planType, furnitureTemplate, roomId, style)
+          .filter(piece => !(layout.fromPlan && BUILT_IN_CATEGORIES.has(piece.category)))
         if (!furniture.length) return null
 
         const [designW, , designD] = getRoomSize(roomId, planType)

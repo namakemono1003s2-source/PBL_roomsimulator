@@ -5,7 +5,6 @@ import PlanSelector from './components/PlanSelector'
 import FurnitureSelector from './components/FurnitureSelector'
 import CustomizationPanel from './components/CustomizationPanel'
 import Minimap from './components/Minimap'
-import ClearanceReadout from './components/ClearanceReadout'
 import FlowCheck from './components/FlowCheck'
 import SummaryScreen from './components/SummaryScreen'
 import { PLAN_ROOMS, PLAN_INFO, FURNITURE_TEMPLATES, ROOM_ICON } from './data/roomData'
@@ -139,10 +138,10 @@ function Simulation() {
         onToggle={() => setPanelOpen(o => !o)}
       />
 
-      {/* 左下: 間取りミニマップ＋通路幅の常時表示 */}
+      {/* 左下: 間取りミニマップ */}
       <div className="sim-bottomleft">
         <Minimap planType={planType} />
-        <ClearanceReadout planType={planType} furnitureTemplate={furnitureTemplate} />
+        {/* 通路幅の表示（ClearanceReadout）は家具を非表示にしている間は止める（2026-10-27） */}
       </div>
 
       {/* #6: 「最初から」確認ダイアログ */}

@@ -1,21 +1,29 @@
 import { useStore } from '../store/useStore'
+import { I_PLAN } from '../data/floorplans/iType'
 
-// 間取り図ミニマップ用の部屋矩形（apartmentLayout.js の実面積区画と同一比率）。
+// 平面図データ(単位m)から、ミニマップ用の部屋矩形(SVG座標)を作る。
+// 部屋タブと対応する区画(roomIdあり)だけを描き、同じ roomId の矩形はまとめて選択される。
+const MINIMAP_SCALE = 20
+const MINIMAP_MARGIN = 8
+function minimapFromPlan(plan) {
+  const { w, d } = plan.footprint
+  const toSvg = v => v * MINIMAP_SCALE + MINIMAP_MARGIN
+  return {
+    viewBox: `0 0 ${w * MINIMAP_SCALE + MINIMAP_MARGIN * 2} ${d * MINIMAP_SCALE + MINIMAP_MARGIN * 2}`,
+    outer: { x: MINIMAP_MARGIN, y: MINIMAP_MARGIN, w: w * MINIMAP_SCALE, h: d * MINIMAP_SCALE },
+    rooms: plan.spaces.filter(s => s.roomId).flatMap(s =>
+      [...s.rects, ...(s.aux ?? [])].map(([x, y, rw, rd]) => ({
+        id: s.roomId, label: s.label,
+        x: toSvg(x), y: toSvg(y), w: rw * MINIMAP_SCALE, h: rd * MINIMAP_SCALE,
+      }))
+    ),
+  }
+}
+
+// 間取り図ミニマップ用の部屋矩形。
 // Simulation画面の3D操作を邪魔しない範囲で、「今どこを見ているか」を伝えるための地図。
 const MINIMAP_ROOMS = {
-  I: {
-    viewBox: '0 0 200 268',
-    outer: { x: 8, y: 16, w: 184, h: 236 },
-    rooms: [
-      { id: 'living',   label: 'LD',    x: 8,   y: 156, w: 124, h: 96  },
-      { id: 'kitchen',  label: 'K',     x: 8,   y: 105, w: 72,  h: 51  },
-      { id: 'bedroom',  label: '①',    x: 8,   y: 16,  w: 72,  h: 89  },
-      { id: 'bedroom2', label: '②',    x: 132, y: 16,  w: 60,  h: 77  },
-      { id: 'bedroom3', label: '③',    x: 132, y: 135, w: 60,  h: 117 },
-      { id: 'bathroom', label: '浴',    x: 132, y: 93,  w: 60,  h: 42  },
-      { id: 'toilet',   label: '',      x: 112, y: 80,  w: 20,  h: 21  },
-    ],
-  },
+  I: minimapFromPlan(I_PLAN),
   H: {
     viewBox: '0 0 200 240',
     outer: { x: 16, y: 16, w: 172, h: 208 },
@@ -44,11 +52,11 @@ export default function Minimap({ planType }) {
           x={map.outer.x} y={map.outer.y} width={map.outer.w} height={map.outer.h}
           fill="rgba(233,233,237,.05)" style={{ stroke: 'var(--text-faint)' }} strokeWidth="2"
         />
-        {map.rooms.map(r => {
+        {map.rooms.map((r, i) => {
           const sel = r.id === selectedRoom
           return (
             <rect
-              key={r.id}
+              key={`${r.id}-${i}`}
               x={r.x} y={r.y} width={r.w} height={r.h}
               rx="1"
               className="minimap-room"
